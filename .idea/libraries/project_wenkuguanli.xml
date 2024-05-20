@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="project_wenkuguanli">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/project_backend/src/test/project_wenkuguanli.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
