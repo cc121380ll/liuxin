@@ -1,7 +1,7 @@
 <!-- 班主任——选科管理 -->
 <template>
-	<h3>选科管理</h3>
 	<div class="container">
+    <h3>选科管理</h3>
 		<el-form :model="query" ref="queryForm">
 			 <el-input v-model="query.name" placeholder="姓名" class="search-input mr10"></el-input>
 				<el-select v-model="query.subject" placeholder="学科" class="search-input mr10">
@@ -18,9 +18,13 @@
 					</el-select>
 				<el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
 		</el-form>
-		<el-button type="primary" class="button"  @click="exportXlsx">导出选科名单</el-button>
+		<el-button type="info" class="button"  @click="exportXlsx">导出选科名单</el-button>
 		<el-table :data="tableData" border class="table" header-cell-class-name="table-header" style="margin-top: 20px;">
-		    <el-table-column prop="id" label="序号" align="center"></el-table-column>
+      <el-table-column label="序号" align="center">
+        <template #default="scope">
+          {{ (scope.$index+1)+(query.pageNum-1)*query.pageSize }}
+        </template>
+      </el-table-column>
 		    <el-table-column prop="name" label="姓名"  align="center"></el-table-column>
 		    <el-table-column prop="studentNumber" label="学号"  align="center"></el-table-column>
 			<el-table-column prop="subject" label="选择科目" align="center"></el-table-column>
@@ -49,7 +53,7 @@ import {  Search } from '@element-plus/icons-vue';
 import SubjectEdit from '../components/subjects-edit.vue';
 import * as XLSX from 'xlsx';
 import { fetchData } from '../api';
-import {getMyData, search} from "../net/index.js";
+import {getMyData, search,takeAccessToken} from "../net/index.js";
 
 const query = reactive({
   name:'',
@@ -173,6 +177,7 @@ const exportXlsx = () => {
     XLSX.utils.book_append_sheet(new_workbook, WorkSheet, '第一页');
     XLSX.writeFile(new_workbook, `表格.xlsx`);*/
   /*exportXlsx('/api/')*/
+  window.open('http://localhost:8083/api/teacher-system/export?token='+takeAccessToken())
 };
 
 

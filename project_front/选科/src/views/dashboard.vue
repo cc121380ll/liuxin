@@ -1,4 +1,5 @@
 <!-- 首页 -->
+
 <template>
 	<div>
 		<el-row :gutter="20">
@@ -8,17 +9,20 @@
 						<el-avatar :size="120" :src="imgurl" />
 						<div class="user-info-cont">
 							<div class="user-info-name">{{ name }}</div>
-							<div>{{ role }}</div>
 						</div>
 					</div>
 					<div class="user-info-list">
-						上次登录时间：
-						<span>2022-10-01</span>
+						 登录时间：
+						<span>{{formattedDate}}</span>
 					</div>
-					<div class="user-info-list">
+<!--					<div class="user-info-list">
 						上次登录地点：
 						<span>东莞</span>
-					</div>
+					</div>-->
+          <div class="user-info-list">
+            用户角色：
+            <span>{{ role }}</span>
+          </div>
 				</el-card>
 			</el-col>
 			<el-col :span="16">
@@ -28,8 +32,8 @@
 							<div class="grid-content grid-con-1">
 								<el-icon class="grid-con-icon"><User /></el-icon>
 								<div class="grid-cont-right">
-									<div class="grid-num">1234</div>
-									<div>用户访问量</div>
+									<div class="grid-num">{{num}}</div>
+									<div>学生总人数</div>
 								</div>
 							</div>
 						</el-card>
@@ -48,41 +52,127 @@
 				</el-row>
 			</el-col>
 		</el-row>
-		<div class="container">
-		    <div class="handle-box">
-		        <el-upload
+		<div class="container" v-permiss="16">
+		    <div class="handle-box" style="display: flex; align-items: center; justify-content: center;">
+<!--		        <el-upload
 		            action="#"
 		            :limit="1"
 		            accept=".xlsx, .xls"
 		            :show-file-list="false"
 		            :before-upload="beforeUpload"
 		        >
-		            <el-button class="mr10" type="success">批量导入学生</el-button>
-					<el-button class="mr20" type="success">批量导入班主任</el-button>
-					<el-link target="_blank" @click="template">下载模板</el-link>
-		        </el-upload>
+              <el-icon class="el-icon&#45;&#45;upload"><upload-filled /></el-icon>
+              <div class="upload-area"  @dragover.prevent="handleDragOver" @drop.prevent="handleFileDrop">
+                拖拽文件到这里上传
+              </div>
+		        </el-upload>-->
+          <el-upload
+              class="upload-demo"
+              drag
+              action="http://jsonplaceholder.typicode.com/api/posts/"
+              :limit="1"
+              accept=".xlsx, .xls"
+              :show-file-list="false"
+              :before-upload="beforeUpload"
+          >
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            <div class="el-upload__text" @dragover.prevent="handleDragOver" @drop.prevent="handleFileDrop">
+              点击或拖拽上传
+            </div>
+          </el-upload>
+<!--          <el-icon class="el-icon&#45;&#45;upload"><upload-filled /></el-icon>
+          <div class="my-btn" @click="downloadTemplate">模 板
+          &lt;!&ndash; 下载模板a标签 &ndash;&gt;
+          <a ref="downloadTemplate" style="display: none" href="./学生信息模版示例.xlsx"></a>
+          </div>-->
+          <el-upload
+              class="upload-demo"
+              drag
+              action="http://jsonplaceholder.typicode.com/api/posts/"
+              multiple
+          >
+            <el-icon class="el-icon--upload"><document/></el-icon>
+            <div class="el-upload__text"  @click="downloadTemplate">
+              点击下载导入模板
+              <a ref="downloadTemplate" style="display: none" href="./学生信息模版示例.xlsx"/>
+            </div>
+          </el-upload>
 		    </div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts" name="dashboard">
+
+
+import {Delete, Search, CirclePlusFilled, UploadFilled, Document} from '@element-plus/icons-vue';
 import Schart from 'vue-schart';
 import { ref } from 'vue';
 import imgurl from '../assets/img/img.jpg';
-import { UploadProps } from 'element-plus';
+import {ElMessage, UploadProps} from 'element-plus';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
+import {DragEvents} from "element-plus/es/components/tree/src/model/useDragNode";
+import {S_editData, get, getView} from "../net/index.js";
 
 
-const name = localStorage.getItem('ms_username');
-const role: string = name === 'admin' ? '超级管理员' : '普通用户';
-
+const name = JSON.parse(sessionStorage.getItem("access_token")||localStorage.getItem("access_token")).username;
+const role = JSON.parse(sessionStorage.getItem("role"));
+const dragEnter = ref(false);
 const importList = ref<any>([]);
+const num = ref(0);
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // getMonth() 返回的月份是从0开始的
+  const day = date.getDate();
+
+// 使用模板字符串来构建格式，并确保月和日为两位数
+  return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+}
+
+const date = new Date();
+const formattedDate = formatDate(date);
+console.log(formattedDate); // 输出: "2024-12-01" (假设date是2024年12月1日的Date对象)
+
+const getNum = ()=>{
+  console.log(role)
+  if(role ==='SCHOOL'){
+    getView('/api/school-system/num',(data)=>{
+      num.value=data
+    })
+  }else{
+    getView('/api/teacher-system/num',(data)=>{
+      num.value=data
+    })
+  }
+}
+getNum()
+const handleDragOver = (e: DragEvent) => {
+  dragEnter.value = true;
+  e.preventDefault();
+};
+
+const handleFileDrop = (e: DragEvent) => {
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    uploadFiles(files);
+  }
+};
+const uploadFiles = (files)=> {
+  // 这里是上传文件的逻辑
+  // 通常是创建一个FormData对象并使用axios发送HTTP请求
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    formData.append('file', files[i]);
+  }
+  S_editData('/api/school-system/upload','multipart/form-data',formData,()=>{
+  })
+}
 const beforeUpload: UploadProps['beforeUpload'] = async (rawFile) => {
     importList.value = await analysisExcel(rawFile);
     return true;
 };
+
 const analysisExcel = (file: any) => {
     return new Promise(function (resolve, _reject) {
         const reader = new FileReader();
@@ -117,7 +207,7 @@ const analysisExcel = (file: any) => {
 // };
 
 const template = () => {
-  axios.get('https://localhost:8083/api/school-system/download-template', {
+  /*  axios.get('/api/school-system/download-template', {
     responseType: 'blob'
   })
   .then(response => {
@@ -131,11 +221,26 @@ const template = () => {
   })
   .catch(error => {
     console.error('下载模板失败:', error);
-  });
-};
+  });*/
+  /*  getWithType('/api/school-system/download-template',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8',()=>{
+    ElMessage.success("下载成功")
+  })
+};*/
+}
+</script>
+<script lang="ts" name="dashboard">
+export default {
+  methods: {
+// 点击模板按钮触发a下载文件
+    downloadTemplate() {
+      this.$refs.downloadTemplate.dispatchEvent(new MouseEvent('click'))
+    }
+  }
+}
 </script>
 
-<style scoped>
+<!--<style scoped>
 .el-row {
 	margin-bottom: 20px;
 }
@@ -245,5 +350,155 @@ const template = () => {
 .mr20{
 	margin-right: 10px;
 
+}
+.upload-area {
+
+  width: 150px;
+  font-size: 12px;
+  background-color: #EEEEEE;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+.upload-area.drag-over {
+  background-color: #f0f0f0;
+  border-color: #000;
+}
+.upload-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+.upload-text {
+  font-size: 16px;
+  color: #333;
+}
+.upload-click {
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.my-btn{
+  width:150px;
+  height:85px;
+}
+</style>-->
+<style scoped>
+.upload-demo{
+  margin: 20px;
+  width: 400px;
+  height: 200px;
+}
+.el-upload__text{
+  font-size: 18px;
+}
+.el-row {
+  margin-bottom: 20px;
+}
+
+.grid-content {
+  display: flex;
+  align-items: center;
+  height: 100px;
+}
+
+.grid-cont-right {
+  flex: 1;
+  text-align: center;
+  font-size: 14px;
+  color: #999;
+}
+
+.grid-num {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.grid-con-icon {
+  font-size: 50px;
+  width: 100px;
+  height: 100px;
+  text-align: center;
+  line-height: 100px;
+  color: #fff;
+}
+
+.grid-con-1 .grid-con-icon {
+  background: rgb(45, 140, 240);
+}
+
+.grid-con-1 .grid-num {
+  color: rgb(45, 140, 240);
+}
+
+.grid-con-2 .grid-con-icon {
+  background: rgb(100, 213, 114);
+}
+
+.grid-con-2 .grid-num {
+  color: rgb(100, 213, 114);
+}
+
+.grid-con-3 .grid-con-icon {
+  background: rgb(242, 94, 67);
+}
+
+.grid-con-3 .grid-num {
+  color: rgb(242, 94, 67);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #ccc;
+  margin-bottom: 20px;
+}
+
+.user-info-cont {
+  padding-left: 50px;
+  flex: 1;
+  font-size: 14px;
+  color: #999;
+}
+
+.user-info-cont div:first-child {
+  font-size: 30px;
+  color: #222;
+}
+
+.user-info-list {
+  font-size: 14px;
+  color: #999;
+  line-height: 25px;
+}
+
+.user-info-list span {
+  margin-left: 70px;
+}
+
+.mgb20 {
+  margin-bottom: 20px;
+}
+
+.todo-item {
+  font-size: 14px;
+}
+
+.todo-item-del {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.schart {
+  width: 100%;
+  height: 300px;
+}
+
+.mr10 {
+  margin-right: 10px;
+}
+.mr20{
+  margin-right: 10px;
 }
 </style>

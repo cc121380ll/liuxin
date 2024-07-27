@@ -27,7 +27,7 @@ const routes: RouteRecordRaw[] = [
             },
             {
                 path: '/table',
-                name: 'basetable',
+                name: 'table',
                 meta: {
                     title: '学生管理',
                     permiss: '2',
@@ -36,28 +36,28 @@ const routes: RouteRecordRaw[] = [
             },
             {
                 path: '/charts',
-                name: 'basecharts',
+                name: 'charts',
                 meta: {
                     title: '图表',
-                    permiss: '11',
+                    permiss: '3',
                 },
                 component: () => import(/* webpackChunkName: "charts" */ '../views/charts.vue'),
             },
-            {
+           /* {
                 path: '/form',
                 name: 'baseform',
                 meta: {
                     title: '表单',
                     permiss: '5',
                 },
-                component: () => import(/* webpackChunkName: "form" */ '../views/form.vue'),
-            },
+                component: () => import(/!* webpackChunkName: "form" *!/ '../views/form.vue'),
+            },*/
             {
                 path: '/tabs',
                 name: 'tabs',
                 meta: {
                     title: '选科管理',
-                    permiss: '3',
+                    permiss: '4',
                 },
                 component: () => import(/* webpackChunkName: "tabs" */ '../views/tabs.vue'),
             },
@@ -66,19 +66,19 @@ const routes: RouteRecordRaw[] = [
                 name: 'donate',
                 meta: {
                     title: '选科管理',
-                    permiss: '14',
+                    permiss: '5',
                 },
                 component: () => import(/* webpackChunkName: "donate" */ '../views/donate.vue'),
             },
-            {
+           /* {
                 path: '/permission',
                 name: 'permission',
                 meta: {
                     title: '权限管理',
                     permiss: '13',
                 },
-                component: () => import(/* webpackChunkName: "permission" */ '../views/permission.vue'),
-            },
+                component: () => import(/!* webpackChunkName: "permission" *!/ '../views/permission.vue'),
+            },*/
             {
                 path: '/upload',
                 name: 'upload',
@@ -102,33 +102,34 @@ const routes: RouteRecordRaw[] = [
                 name: 'user',
                 meta: {
                     title: '个人中心',
+                    permiss:'7'
                 },
                 component: () => import(/* webpackChunkName: "user" */ '../views/user.vue'),
             },
-            {
+          /*  {
                 path: '/editor',
                 name: 'editor',
                 meta: {
                     title: '富文本编辑器',
                     permiss: '8',
                 },
-                component: () => import(/* webpackChunkName: "editor" */ '../views/editor.vue'),
-            },
-            {
+                component: () => import(/!* webpackChunkName: "editor" *!/ '../views/editor.vue'),
+            },*/
+      /*      {
                 path: '/markdown',
                 name: 'markdown',
                 meta: {
                     title: 'markdown编辑器',
                     permiss: '9',
                 },
-                component: () => import(/* webpackChunkName: "markdown" */ '../views/markdown.vue'),
-            },
+                component: () => import(/!* webpackChunkName: "markdown" *!/ '../views/markdown.vue'),
+            },*/
             {
                 path: '/export',
                 name: 'export',
                 meta: {
                     title: '学生管理',
-                    permiss: '2',
+                    permiss: '8',
                 },
                 component: () => import(/* webpackChunkName: "export" */ '../views/export.vue'),
             },
@@ -137,7 +138,7 @@ const routes: RouteRecordRaw[] = [
                 name: 'import',
                 meta: {
                     title: '班主任管理',
-                    permiss: '2',
+                    permiss: '9',
                 },
                 component: () => import(/* webpackChunkName: "import" */ '../views/import.vue'),
             },
@@ -182,19 +183,19 @@ const router = createRouter({
     routes,
 });
 
-/*router.beforeEach((to, from, next) => {
+router.beforeEach((to, from, next) => {
     NProgress.start();
-    const role = localStorage.getItem('ms_username');
+    const isUnauthorized = unauthorized()
     const permiss = usePermissStore();
-    if (!role && to.path !== '/login') {
+    if (isUnauthorized && to.path !== '/login') {
         next('/login');
-    } else if (to.meta.permiss && !permiss.key.includes(to.meta.permiss)) {
+    } else if (to.meta.permiss && !permiss.key.includes(to.meta.permiss)&&!isUnauthorized) {
         // 如果没有权限，则进入403
         next('/403');
     } else {
         next();
     }
-});*/
+});
 /*router.beforeEach((to, from, next) => {
     const isUnauthorized = unauthorized()
     if(to.name.startsWith('Login') && !isUnauthorized) {

@@ -19,4 +19,28 @@ export default defineConfig({
 	optimizeDeps: {
 		include: ['schart.js']
 	}
+
 });
+
+/*
+export default defineConfig({
+	base: './',
+	plugins: [
+		vue(),
+		VueSetupExtend(),
+		AutoImport({
+			resolvers: [ElementPlusResolver()]
+		}),
+		Components({
+			resolvers: [ElementPlusResolver()]
+		})
+	],
+	optimizeDeps: {
+		include: ['schart.js']
+	},
+	build: {
+		rollupOptions: {
+			external: ['BMap'] // 排除 'BMap'
+		}
+	}
+});*/

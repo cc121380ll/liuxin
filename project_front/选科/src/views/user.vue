@@ -29,15 +29,33 @@
 					</template>
 					<el-form label-width="90px">
 						<el-form-item label="用户名："> {{ name }} </el-form-item>
+            <el-form-item  label="手机号：">
+              <el-input class="input" v-model="form.phone"></el-input>
+            </el-form-item>
 						<el-form-item label="旧密码：">
-							<el-input type="password" v-model="form.old"></el-input>
+							<el-input class="input" type="password" v-model="form.oldPassword"></el-input>
 						</el-form-item>
 						<el-form-item label="新密码：">
-							<el-input type="password" v-model="form.new"></el-input>
+							<el-input class="input" type="password" v-model="form.newPassword"></el-input>
 						</el-form-item>
+<!--            <el-form-item  label="验证码：">
+              <el-input style="width: 180px;" v-model="form.code"></el-input>
+            </el-form-item>
 						<el-form-item>
 							<el-button type="primary" @click="onSubmit">保存</el-button>
-						</el-form-item>
+						</el-form-item>-->
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="验证码：">
+                  <el-input style="width: 100%;" v-model="form.code"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item>
+                  <el-button type="primary" @click="onSubmit">保存</el-button>
+                </el-form-item>
+              </el-col>
+            </el-row>
 					</el-form>
 				</el-card>
 			</el-col>
@@ -51,13 +69,15 @@ import VueCropper from 'vue-cropperjs';
 import 'cropperjs/dist/cropper.css';
 import avatar from '../assets/img/img.jpg';
 import { ElMessage, FormInstance, FormRules, UploadProps } from 'element-plus';
-
-const name = localStorage.getItem('ms_username');
+import {put,editData,post} from "../net/index.js";
+const name=JSON.parse(sessionStorage.getItem("access_token")||localStorage.getItem("access_token")).username
 const form = reactive({
-	old: '',
-	new: '',
+  phone:'',
+  code:'',
+	oldPassword: '',
+	newPassword: '',
 });
-const onSubmit = async () => {
+/*const onSubmit = async () => {
   try {
     // 模拟提交表单的 API 请求，实际应根据具体情况调用后端 API
     const response = await api.updatePassword(name, form.old, form.new);
@@ -72,10 +92,10 @@ const onSubmit = async () => {
     console.error('保存失败：', error);
     ElMessage.error('保存失败，请重试！');
   }
-};
+};*/
 
 
-const api = {
+/*const api = {
   async updatePassword(username: string, oldPassword: string, newPassword: string) {
     try {
       const response = await fetch('https://localhost:8083/api/school-system/reset/reset-password', {
@@ -100,7 +120,7 @@ const api = {
       throw error;
     }
   }
-};
+};*/
 
 // const onSubmit = (formEl:FormInstance|undefined) => {
 // 	if (!formEl) return;
@@ -109,7 +129,11 @@ const api = {
 // 		props.update(form.value);
 // 		ElMessage.success('保存成功！');
 // };
-
+const onSubmit = ()=>{
+  post('/api/school-system/reset/school/reset-password',form,()=>{
+    ElMessage.success("更新成功")
+  })
+}
 
 const avatarImg = ref(avatar);
 const imgSrc = ref('');
@@ -199,5 +223,8 @@ const saveAvatar = () => {
 	top: 0;
 	opacity: 0;
 	cursor: pointer;
+}
+.input{
+  width: 350px;
 }
 </style>

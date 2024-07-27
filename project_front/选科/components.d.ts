@@ -26,6 +26,7 @@ declare module '@vue/runtime-core' {
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElIcon: typeof import('element-plus/es')['ElIcon']
+    ElIconSPromotion: typeof import('@element-plus/icons-vue')['SPromotion']
     ElImage: typeof import('element-plus/es')['ElImage']
     ElInpu: typeof import('element-plus/es')['ElInpu']
     ElInput: typeof import('element-plus/es')['ElInput']
@@ -59,6 +60,7 @@ declare module '@vue/runtime-core' {
     TableDetail: typeof import('./src/components/table-detail.vue')['default']
     TableEdit: typeof import('./src/components/table-edit.vue')['default']
     Tags: typeof import('./src/components/tags.vue')['default']
+    TeacherDetail: typeof import('./src/components/teacher-detail.vue')['default']
     TeacherEdit: typeof import('./src/components/teacher-edit.vue')['default']
     Viewstudent: typeof import('./src/components/viewstudent.vue')['default']
   }

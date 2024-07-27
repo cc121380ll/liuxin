@@ -1,7 +1,9 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import {usePermissStore} from "../store/permiss";
 
 const authItemName = "access_token"
+
 function unauthorized() {
 	return !takeAccessToken()
 }
@@ -35,13 +37,14 @@ function deleteAccessToken(){
 	localStorage.removeItem(authItemName)
 	sessionStorage.removeItem(authItemName)
 }
-function storeAccessTokenAndRole(token,remember,role,expire){
+function storeAccessTokenAndRole(username,token,remember,role,expire){
 	const authObj = {
+		username:username,
 		token:token,
 		expire:expire,
 	}
-	const myRole = {role:role}
-	const jRole = JSON.stringify(myRole)
+	/*const myRole = {role:role}
+	const jRole = JSON.stringify(myRole)*/
 	const str = JSON.stringify(authObj)
 	if(remember){
 		localStorage.setItem(authItemName,str)
@@ -49,10 +52,13 @@ function storeAccessTokenAndRole(token,remember,role,expire){
 	else{
 		sessionStorage.setItem(authItemName,str)
 	}
-	sessionStorage.setItem("role",jRole)
+	/*sessionStorage.setItem("role",jRole)*/
 }
 function post(url, data, success, failure = defaultFailure) {
 	internalPost(url, data, accessHeader() , success, failure)
+}
+function put(url,data,success,failure=defaultFailure){
+	internalPut(url,data,accessHeader(),success,failure)
 }
 function get(url,success, failure = defaultFailure) {
 	internalGet(url, accessHeader(), success, failure)
@@ -60,9 +66,47 @@ function get(url,success, failure = defaultFailure) {
 function deletes(url, success , failure = defaultFailure){
 	internalDelete(url, accessHeader(), success, failure)
 }
+function async_post(url, data, success, failure = defaultFailure) {
+	async_internalPost(url, data, accessHeader(), defaultError, failure)
+		.then(success)
+		.catch(err=>{
+			failure(err)
+		});
+}
+async function async_internalPost(url, data, header, error = defaultError, failure) {
+	try {
+		const response = await axios.post(url, data, { headers: header });
+		if (response.data.code === 200) {
+			ElMessage.success("操作成功")
+			return response.data.data;
+		} else {
+			ElMessage.error(response.data.message)
+			return null;
+		}
 
-function internalPost(url,data,header,success,error,failure = defaultError){
-	axios.post(url,data,{headers:header}).then(({data})=>{
+	} catch (err) {
+		error(err); // 这里可以直接抛出错误，或者创建一个自定义错误对象
+	}
+}
+function internalPost(url, data, headers, success, failure, error = defaultError){
+	axios.post(url, data, { headers: headers }).then(({data}) => {
+		if(data.code === 200)
+			success(data.data)
+		else
+			failure(data.message, data.code, url)
+	}).catch(err => error(err))
+}
+
+function internalGet(url, headers, success, failure, error = defaultError){
+	axios.get(url, { headers: headers }).then(({data}) => {
+		if(data.code === 200)
+			success(data.data)
+		else
+			failure(data.message, data.code, url)
+	}).catch(err => error(err))
+}
+function internalDelete(url, headers, success, failure, error = defaultError){
+	axios.delete(url,{headers:headers}).then(({data})=>{
 		if(data.code===200){
 			success(data.data)
 		}else{
@@ -70,26 +114,17 @@ function internalPost(url,data,header,success,error,failure = defaultError){
 		}
 	}).catch(err=>error(err))
 }
-
-function internalGet(url,header,success,error,failure = defaultError){
-	axios.get(url,{headers:header}).then(({data})=>{
+function internalPut(url,data,header,success,failure,error = defaultError){
+	axios.put(url,data,{headers:header}).then(({data})=>{
 		if(data.code===200){
 			success(data.data)
 		}else{
 			failure(data.message,data.code,url)
 		}
-	}).catch(err=>error(err))
+	}).catch(err=>{
+		error(err)
+	})
 }
-function internalDelete(url,header,success,error,failure = defaultFailure){
-	axios.delete(url,{headers:header}).then(({data})=>{
-		if(data.code===200){
-			success(data.data)
-		}else{
-			failure(data.message,data.code,url)
-		}
-	}).catch(err=>(err))
-}
-
 
 
 function login(username,password,remember,success,failure=defaultFailure){
@@ -99,8 +134,13 @@ function login(username,password,remember,success,failure=defaultFailure){
 	},{
 		'Content-Type':'application/x-www-form-urlencoded'
 	},(data)=>{
-		storeAccessTokenAndRole(data.token,remember,data.role,data.expire)
+		const permiss = usePermissStore();
+		storeAccessTokenAndRole(data.username,data.token,remember,data.role,data.expire)
+		const keys = permiss.defaultList[data.role === 'TEACHER'?'TEACHER':'SCHOOL']; // 根据用户名获取权限列表
+		permiss.handleSet(keys)
 		ElMessage.success(`登陆成功，欢迎${data.username}来到我们的系统`)
+		localStorage.setItem('ms_keys', JSON.stringify(keys));
+		sessionStorage.setItem('role',JSON.stringify(data.role))
 		success(data)
 	},failure)
 }
@@ -108,10 +148,10 @@ function logout(success, failure = defaultFailure){
 	get('/api/auth/logout', () => {
 		deleteAccessToken()
 		ElMessage.success(`退出登录成功，欢迎您再次使用`)
-		success()
+		//success()
 	}, failure)
 }
-function search(url,data,success,failure){
+function search(url,data,success,failure=defaultFailure){
 	post(url,data,(data)=>{
 		success(data)
 	},failure)
@@ -145,14 +185,41 @@ function deleteData(url) {
 		});
 	});
 }
-function editData(url,data,success,failure){
-	post(url,data,()=>{
+function editData(url,data,success,failure = defaultFailure) {
+	async_post(url, data, () => {
 		success()
-	},failure)
+	}, failure)
+
 }
-function exportXlsx(url,success,failure){
+function S_editData(url,myType,data,success,failure = defaultFailure){
+	async_internalPost(url, data, {
+		'Content-Type': myType,
+		'Authorization': `Bearer ${takeAccessToken()}`
+	}, () => {
+		success()
+	}, failure)
+		.then(success)
+		.catch(err=>{
+			failure(err)
+		})
+}
+
+function exportXlsx(url,success,failure=defaultFailure){
 	get(url,()=>{
 		success()
 	},failure)
 }
-export {login,unauthorized,get,post,logout,search,getMyData,deleteData,editData}
+function getWithType(url,myType,success,failure=defaultFailure){
+	internalGet(url,{
+		'Content-Type': myType,
+		'Authorization': `Bearer ${takeAccessToken()}`
+	},()=>{
+		success()
+	},failure)
+}
+function getView(url,success,failure = defaultFailure){
+	return get(url,(data)=>{
+		success(data)
+	},failure)
+}
+export {login,unauthorized,get,post,logout,search,getMyData,deleteData,editData,S_editData,getView,put,getWithType,takeAccessToken}

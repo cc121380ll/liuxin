@@ -5,8 +5,8 @@
 			{{ data.name }}
 		</el-descriptions-item>
 		<el-descriptions-item>
-			<template #label> 学号 </template>
-			{{ data.sno }}
+			<template #label> 初始密码 </template>
+			{{ data.password }}
 		</el-descriptions-item>
 	</el-descriptions>
 </template>

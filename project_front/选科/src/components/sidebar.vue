@@ -53,7 +53,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useSidebarStore } from '../store/sidebar';
-import { useRoute } from 'vue-router';
+import { useRoute} from 'vue-router';
+import {watch,ref} from "vue";
 
 const items = [
     {
@@ -66,43 +67,50 @@ const items = [
         icon: 'Calendar',
         index: '1',
         title: '学校',
-        permiss: '2',
+        permiss: '3',
         subs: [
             {
                 index: '/export',
                 title: '学生管理',
-                permiss: '2',
+                permiss: '3',
             },
             {
                 index: '/import',
                 title: '班主任管理',
-                permiss: '2',
+                permiss: '3',
             },
             {
                 index: '/donate',
                 title: '选科管理',
-                permiss: '2',
+                permiss: '3',
 				}
 				]
             },
+
     {
         icon: 'DocumentCopy',
-        index: '/tabs',
+        index: '2',
         title: '班主任',
-        permiss: '3',
+        permiss: '2',
 		subs:[
 			{
 				index:'/table',
 				title:'学生管理',
-				permiss:'3',
+				permiss:'2',
 			},
 			{
 				index:'/tabs',
 				title:'选科管理',
-				permiss:'3',
+				permiss:'4',
 			},
 		]
     },
+  {
+    icon:'User',
+    index:'/user',
+    title: '个人中心',
+    permiss:'7'
+  },
     // {
     //     icon: 'PieChart',
     //     index: '/charts',
@@ -113,7 +121,7 @@ const items = [
 
 const route = useRoute();
 const onRoutes = computed(() => {
-    return route.path;
+  return route.fullPath;
 });
 
 const sidebar = useSidebarStore();

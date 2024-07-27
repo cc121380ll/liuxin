@@ -3,24 +3,34 @@
 		<el-form-item label="姓名" prop="name">
 			<el-input v-model="form.name"></el-input>
 		</el-form-item>
-		<el-form-item label="性别" prop="sex">
-			<el-input v-model.number="form.sex"></el-input>
+		<el-form-item label="性别" prop="gender">
+      <el-select v-model="form.gender">
+        <el-option value="男"/>
+        <el-option value="女"/>
+      </el-select>
 		</el-form-item>
-		<el-form-item label="学号" prop="sno">
-			<el-input v-model="form.sno"></el-input>
+		<el-form-item label="学号" prop="studentNumber">
+			<el-input v-model="form.studentNumber"></el-input>
 		</el-form-item>
-		<el-form-item label="年纪" prop="grade">
-			<el-input v-model="form.grade"></el-input>
+		<el-form-item label="年级" prop="grade">
+      <el-select v-model="form.grade">
+        <el-option value="一年级"/>
+        <el-option value="二年级"/>
+        <el-option value="三年级"/>
+      </el-select>
 		</el-form-item>
-		<el-form-item label="行政班级" prop="class">
-			<el-input v-model="form.class"></el-input>
+		<el-form-item label="行政班级" prop="_class">
+			<el-input v-model="form._class"></el-input>
 		</el-form-item>
-		<el-form-item label="班主任" prop="teacher">
-			<el-input v-model="form.teacher"></el-input>
+		<el-form-item label="班主任" prop="classTeacher">
+			<el-input v-model="form.classTeacher"></el-input>
 		</el-form-item>
-		<el-form-item label="创建时间" prop="created_time">
+    <el-form-item label="班主任电话" prop="classTeacherPhone">
+			<el-input v-model="form.classTeacherPhone"></el-input>
+		</el-form-item>
+<!--		<el-form-item label="创建时间" prop="created_time">
 			<el-date-picker type="date" v-model="form.created_time" value-format="YYYY-MM-DD"></el-date-picker>
-		</el-form-item>
+		</el-form-item>-->
 		<el-form-item>
 			<el-button type="primary" @click="saveEdit(formRef)">保 存</el-button>
 		</el-form-item>
@@ -49,19 +59,20 @@ const props = defineProps({
 const defaultData = {
 	id: '',
 	name: '',
-	sno: '',
+  gender: '',
+  studentNumber: '',
 	grade: '',
-	class: '',
-	teacher:'',
-	created_time: new Date()
+  _class: '',
+  classTeacher:'',
+  classTeacherPhone:'',
 };
 
 const form = ref({ ...(props.edit ? props.data : defaultData) });
 
 const rules: FormRules = {
 	name: [{ required: true, message: '姓名', trigger: 'blur' }],
-	sno: [{ required: true, message: '学号', trigger: 'blur' }],
-	sex: [{ required:false, message: '性别', trigger: 'blur' }],
+	studentNumber: [{ required: true, message: '学号', trigger: 'blur' }],
+	gender: [{ required:false, message: '性别', trigger: 'blur' }],
 };
 const formRef = ref<FormInstance>();
 const saveEdit = (formEl: FormInstance | undefined) => {

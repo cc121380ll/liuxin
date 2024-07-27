@@ -8,14 +8,13 @@ import 'element-plus/dist/index.css';
 import './assets/css/icon.css';
 import axios from 'axios'
 
-axios.defaults.baseURL='http://localhost:8083'
 
-axios.defaults.withCredentials = true;
 
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
-
+axios.defaults.baseURL='http://localhost:8083'
+axios.defaults.withCredentials = true;
 // 注册elementplus图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component);

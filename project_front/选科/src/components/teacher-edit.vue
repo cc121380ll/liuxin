@@ -5,16 +5,17 @@
 		</el-form-item>
 		<el-form-item label="手机号" prop="phone">
 			<el-input v-model="form.phone"></el-input>
-		</el-form-item>
+		</el-form-item><!--
 		<el-form-item label="年级" prop="grade">
-			<el-input v-model="form.grade"></el-input>
+			 <el-select v-model="form.grade">
+         <el-option value="一年级"/>
+         <el-option value="二年级"/>
+         <el-option value="三年级"/>
+       </el-select>
 		</el-form-item>
 		<el-form-item label="行政班级" prop="class">
-			<el-input v-model="form.class"></el-input>
-		</el-form-item>
-		<el-form-item label="创建时间" prop="created_time">
-			<el-date-picker type="date" v-model="form.created_time" value-format="YYYY-MM-DD"></el-date-picker>
-		</el-form-item>
+			<el-input v-model="form._class"></el-input>
+		</el-form-item>-->
 		<el-form-item>
 			<el-button type="primary" @click="saveEdit(formRef)">保 存</el-button>
 		</el-form-item>
@@ -44,9 +45,9 @@ const defaultData = {
 	id: '',
 	name: '',
 	phone: '',
-	grade: '',
-	class: '',
-	created_time: new Date()
+	/*grade: '',
+	_class: '',
+	createdTime: new Date()*/
 };
 
 const form = ref({ ...(props.edit ? props.data : defaultData) });
@@ -61,7 +62,7 @@ const saveEdit = (formEl: FormInstance | undefined) => {
 	formEl.validate(valid => {
 		if (!valid) return false;
 		props.update(form.value);
-		ElMessage.success('保存成功！');
+		//ElMessage.success('保存成功！');
 	});
 };
 

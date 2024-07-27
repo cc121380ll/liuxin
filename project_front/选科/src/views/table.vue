@@ -1,7 +1,7 @@
 <!-- 班主任——学生管理 -->
 <template>
-	<h3>学生管理</h3>
 	<div>
+    <h3>学生管理</h3>
 		<div class="container">
 			<div class="search-box">
         <el-form :model="searchForm" ref="searchFormRef">
@@ -58,7 +58,7 @@
                 type="success"
                 size="small"
                 :icon="Setting"
-                @click="handleRestPassowrd(scope.$index, scope.row)"
+                @click="handleRestPassword(scope.$index)"
                 v-permiss="15">
                 重置密码
             </el-button>
@@ -86,10 +86,10 @@
 		>
 			<TableEdit :data="rowData" :edit="idEdit" :update="updateData" />
 		</el-dialog>
-		<el-dialog title="重置密码" v-model="visible1" width="700px" destroy-on-close>
-			<TableDetail :data="rowData" />
+		<el-dialog title="重置密码" v-model="visible1" width="500px" destroy-on-close :close-on-click-modal="false" @close="closeDialog1">
+		  <ResetPassword :data="oldPassword" :edit="true" :update="updatePassword"/>
 		</el-dialog>
-	</div>
+  </div>
 </template>
 
 <script setup lang="ts" name="basetable">
@@ -99,9 +99,10 @@ import {Delete, Edit, Search, CirclePlusFilled, Setting} from '@element-plus/ico
 import { fetchData } from '../api/index';
 import TableEdit from '../components/table-edit.vue';
 import TableDetail from '../components/table-detail.vue';
+import ResetPassword from "../components/reset-password.vue";
 import request from '../utils/request';
 import axios from 'axios';
-import { search,getMyData,deleteData,editData} from "../net/index.js";
+import { search,getMyData,deleteData,editData,S_editData} from "../net/index.js";
 import router from "../router";
 
 interface TableItem {
@@ -112,6 +113,8 @@ interface TableItem {
   grade: string,
   _class: string,
   status: number,
+  password:string,
+  createdTime:string,
   updatedTime: string
 }
 const tableData = ref<TableItem[]>([]);
@@ -208,9 +211,9 @@ const handlePageChange = (val: number) => {
 	getStuData();
 };
 //停用启用
-const handleStatusSet = (index:number,row:TableItem) => {
+/*const handleStatusSet = (index:number,row:TableItem) => {
 
-}
+}*/
 // 删除操作
 const handleDelete = (index: number) => {
   // 二次确认删除
@@ -239,15 +242,19 @@ const handleDelete = (index: number) => {
 
 const visible = ref(false);
 let idx: number = -1;
+let idy: bigint = -1n;
 const idEdit = ref(false);
 const rowData = ref<TableItem>();
+const oldPassword = reactive({
+  password:''
+})
 const handleEdit = (index: number, row: TableItem) => {
 	idx = index;
 	rowData.value = row;
 	idEdit.value = true;
 	visible.value = true;
 };
-const updateData = (row: TableItem) => {
+const updateData =async(row: TableItem) => {
   editData(`/api/teacher-system/students/edit/${row.id}`,{
     name:row.name,
     gender:row.gender,
@@ -255,27 +262,45 @@ const updateData = (row: TableItem) => {
     grade:row.grade,
     _class:row._class,
     status:row.status
-  },()=>{
-    ElMessage.success("修改成功")
+  },async ()=>{
+   // ElMessage.success("修改成功")
+    await getStuData()
   })
 
-    idEdit.value ? (tableData.value[idx] = row) : tableData.value.unshift(row);
-    console.log(tableData.value);
+    /*idEdit.value ? (tableData.value[idx] = row) : tableData.value.unshift(row);
+    console.log(tableData.value);*/
 
 	closeDialog();
 };
-
-
+const handleRestPassword = (index:number) =>{
+  idx = index
+  idy = tableData.value[index].id
+  oldPassword.password = tableData.value[index].password
+  visible1.value = true
+}
+const updatePassword =async (password:string)=>{
+  S_editData(`api/teacher-system/students/reset/${idy}`,'multipart/form-data',password,async ()=>{
+    //ElMessage.success("修改成功")
+    const s = tableData.value.findIndex(student => student.id === idy);
+    if (s!=-1) {
+      tableData[s].value.password = password;
+    }
+  })
+ /* const s = tableData.value.findIndex(student => student.id === idy);
+  if (s!=-1) {
+    tableData[s].value.password = password; // 更新密码
+  }*/
+  closeDialog1()
+}
 const closeDialog = () => {
 	visible.value = false;
 	idEdit.value = false;
 };
+const closeDialog1 = ()=> {
+  visible1.value = false;
+}
 
 const visible1 = ref(false);
-const handleView = (row: TableItem) => {
-	rowData.value = row;
-	visible1.value = true;
-};
 
 /*function getData() {
 	throw new Error('Function not implemented.');
