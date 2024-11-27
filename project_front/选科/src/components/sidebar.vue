@@ -57,66 +57,66 @@ import { useRoute} from 'vue-router';
 import {watch,ref} from "vue";
 
 const items = [
-    {
-        icon: 'Odometer',
-        index: '/dashboard',
-        title: '系统首页',
-        permiss: '1',
-    },
- {
-        icon: 'Calendar',
-        index: '1',
-        title: '学校',
-        permiss: '3',
-        subs: [
-            {
-                index: '/export',
-                title: '学生管理',
-                permiss: '3',
-            },
-            {
-                index: '/import',
-                title: '班主任管理',
-                permiss: '3',
-            },
-            {
-                index: '/donate',
-                title: '选科管理',
-                permiss: '3',
-				}
-				]
-            },
-
-    {
-        icon: 'DocumentCopy',
-        index: '2',
-        title: '班主任',
-        permiss: '2',
-		subs:[
-			{
-				index:'/table',
-				title:'学生管理',
-				permiss:'2',
-			},
-			{
-				index:'/tabs',
-				title:'选科管理',
-				permiss:'4',
-			},
-		]
-    },
   {
-    icon:'User',
-    index:'/user',
-    title: '个人中心',
-    permiss:'7'
+    icon: 'Odometer',
+    index: '/dashboard',
+    title: '系统首页',
+    permiss: '1',
   },
-    // {
-    //     icon: 'PieChart',
-    //     index: '/charts',
-    //     title: 'schart图表',
-    //     permiss: '11',
-    // },
+  {
+    icon: 'PieChart',
+    index: '/charts',
+    title: '系统首页',
+    permiss: '12',
+  },
+  {
+    icon: 'Calendar',
+    index: '1',
+    title: '学校',
+    permiss: '11',
+    subs: [
+      {
+        index: '/export',
+        title: '学生管理',
+        permiss: '8',
+      },
+      {
+        index: '/import',
+        title: '班主任管理',
+        permiss: '9',
+      },
+      {
+        index: '/donate',
+        title: '选科管理',
+        permiss: '5',
+      }
+    ]
+  },
+
+  {
+    icon: 'DocumentCopy',
+    index: '2',
+    title: '班主任',
+    permiss: '10',
+    subs:[
+      {
+        index:'/table',
+        title:'学生管理',
+        permiss:'2',
+      },
+      {
+        index:'/tabs',
+        title:'选科管理',
+        permiss:'4',
+      },
+    ],
+  },
+  {
+    icon: 'PieChart',
+    index: '/charts2',
+    title: '学生选课统计',
+    permiss: '13',
+  },
 ];
 
 const route = useRoute();

@@ -9,7 +9,7 @@
 		<div class="header-right">
 			<div class="header-user-con">
 				<!-- 用户头像 -->
-				<el-avatar class="user-avator" :size="30" :src="imgurl" />
+				<el-avatar class="user-avator" :size="30" :src="avatar" />
 				<!-- 用户名下拉菜单 -->
 				<el-dropdown class="user-name" trigger="click" @command="handleCommand">
 					<span class="el-dropdown-link">
@@ -25,20 +25,45 @@
 						</el-dropdown-menu>
 					</template>
 				</el-dropdown>
+<!--        <el-popover trigger="click" @command="handleCommand">
+          <template #reference>
+            <div class="user-name">
+              <span class="el-dropdown-link">{{ username }}</span>
+              <el-icon class="el-icon&#45;&#45;right" style="font-size: 16px;cursor:pointer;">
+                <arrow-down />
+              </el-icon>
+            </div>
+          </template>
+          <div style="display: flex;align-items: center;justify-content: center;flex-direction: column">
+            <el-row>
+              <el-avatar :size="50" :src="imgurl" />
+            </el-row>
+            <el-row :gutter="20">
+              <el-col>
+                登录地点
+              </el-col>
+              <el-col>
+                {{currentCity}}
+              </el-col>
+            </el-row>
+          </div>
+        </el-popover>-->
 			</div>
 		</div>
+
 	</div>
 </template>
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import {onMounted, ref} from 'vue';
 import { useSidebarStore } from '../store/sidebar';
 import { useRouter } from 'vue-router';
-import imgurl from '../assets/img/img.jpg';
-import {logout} from '../net/index.js'
+import {get, logout} from '../net/index.js'
+import {ArrowDown} from "@element-plus/icons-vue";
 
-const username: string | null = localStorage.getItem('ms_username');
+const username = JSON.parse(sessionStorage.getItem("access_token")||localStorage.getItem("access_token")).username
 
 const sidebar = useSidebarStore();
+const avatar = ref('');
 // 侧边栏折叠
 const collapseChage = () => {
 	sidebar.handleCollapse();
@@ -48,11 +73,12 @@ onMounted(() => {
 	if (document.body.clientWidth < 1500) {
 		collapseChage();
 	}
+  get('/api/auth/load-avatar', (data)=>{
+    avatar.value = data;
+  })
 });
 
-// 用户名下拉菜单选择事件
 const router = useRouter();
-
 const handleCommand = (command: string) => {
 	if (command == 'loginout') {
 		logout(router.push('/login'))
@@ -61,39 +87,12 @@ const handleCommand = (command: string) => {
 		router.push('/user');
 	}
 };
-
-// const handleCommand = async (command: string) => {
-//   if (command === 'loginout') {
-//     try {
-//       // 调用退出登录的API
-//       const response = await fetch('https://example.com/api/auth/loginout', {
-//         method: 'POST', // 假设这是一个POST请求
-//         headers: {
-//           'Content-Type': 'application/json'
-//         }
-//       });
-
-//       if (response.ok) {
-//         // API调用成功，假设服务器正确响应
-//         localStorage.removeItem('ms_username'); // 清除本地存储
-//         router.push('/login'); // 跳转到登录页面
-//         alert('退出登录成功'); // 用户反馈
-//       } else {
-//         // API调用失败，处理错误
-//         alert('退出登录失败，请重试');
-//       }
-//     } catch (error) {
-//       // 网络或其他错误
-//       console.error('退出登录出错:', error);
-//       alert('退出登录出错，请检查网络或联系管理员');
-//     }
-//   } else if (command === 'user') {
-//     router.push('/user'); // 跳转到用户页面
-//   }
-// };
-
 </script>
 <style scoped>
+.map{
+  width: 100%;
+  height: 300px;
+}
 .header {
 	position: relative;
 	box-sizing: border-box;
@@ -156,6 +155,8 @@ const handleCommand = (command: string) => {
 }
 .user-name {
 	margin-left: 10px;
+  display: flex;
+  align-items: center;
 }
 .user-avator {
 	margin-left: 20px;
@@ -163,8 +164,9 @@ const handleCommand = (command: string) => {
 .el-dropdown-link {
 	color: #fff;
 	cursor: pointer;
-	display: flex;
-	align-items: center;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
 }
 .el-dropdown-menu__item {
 	text-align: center;

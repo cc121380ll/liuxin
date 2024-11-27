@@ -9,7 +9,11 @@ import { unauthorized } from "../net/index.js";
 const routes: RouteRecordRaw[] = [
     {
         path: '/',
-        redirect: '/dashboard',
+        redirect: to => {
+            const role = JSON.parse(sessionStorage.getItem('role') || localStorage.getItem('role'));
+            if(role === "SCHOOL") return '/dashboard'
+            else return '/charts'
+        },
     },
     {
         path: '/',
@@ -38,10 +42,19 @@ const routes: RouteRecordRaw[] = [
                 path: '/charts',
                 name: 'charts',
                 meta: {
-                    title: '图表',
-                    permiss: '3',
+                    title: '老师端图表',
+                    permiss: '12',
                 },
                 component: () => import(/* webpackChunkName: "charts" */ '../views/charts.vue'),
+            },
+            {
+                path: '/charts2',
+                name: 'charts2',
+                meta: {
+                    title: '学校端图表',
+                    permiss: '13',
+                },
+                component: () => import(/* webpackChunkName: "charts" */ '../views/charts2.vue'),
             },
            /* {
                 path: '/form',
@@ -104,7 +117,7 @@ const routes: RouteRecordRaw[] = [
                     title: '个人中心',
                     permiss:'7'
                 },
-                component: () => import(/* webpackChunkName: "user" */ '../views/user.vue'),
+                component: () => import(/* webpackChunkName: "user" */ '../views/user1.vue'),
             },
           /*  {
                 path: '/editor',
@@ -142,14 +155,7 @@ const routes: RouteRecordRaw[] = [
                 },
                 component: () => import(/* webpackChunkName: "import" */ '../views/import.vue'),
             },
-			/*{
-				path:'/register',
-				name:'Register',
-				meta:{
-					title:'注册',
-				},
-				component:()=>import(/!* webpackChunkName: "zhuce" *!/'../views/zhuce.vue'),
-			}*/
+
         ],
     },
     {
@@ -159,6 +165,14 @@ const routes: RouteRecordRaw[] = [
             title: '登录',
         },
         component: () => import(/* webpackChunkName: "login" */ '../views/login.vue'),
+    },
+    {
+        path:'/register',
+        name:'Register',
+        meta:{
+            title:'注册',
+        },
+        component:()=>import(/* webpackChunkName: "zhuce" */'../views/register.vue'),
     },
 	// {
 	// 	path:'forget',
@@ -187,7 +201,7 @@ router.beforeEach((to, from, next) => {
     NProgress.start();
     const isUnauthorized = unauthorized()
     const permiss = usePermissStore();
-    if (isUnauthorized && to.path !== '/login') {
+    if (isUnauthorized && (to.path !== '/login' && to.path !=='/register')) {
         next('/login');
     } else if (to.meta.permiss && !permiss.key.includes(to.meta.permiss)&&!isUnauthorized) {
         // 如果没有权限，则进入403

@@ -7,10 +7,13 @@ import { usePermissStore } from './store/permiss';
 import 'element-plus/dist/index.css';
 import './assets/css/icon.css';
 import axios from 'axios'
+import { VueCropper } from "vue-cropper";
+import "vue-cropper/dist/index.css";
 
 
 
 const app = createApp(App);
+app.use(VueCropper);
 app.use(createPinia());
 app.use(router);
 axios.defaults.baseURL='http://localhost:8083'

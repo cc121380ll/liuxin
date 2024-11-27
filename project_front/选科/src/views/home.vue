@@ -51,7 +51,7 @@ const analysisExcel = (file: any) => {
     });
 };
 
-const handleMany = async () => {
+/*const handleMany = async () => {
     // 把数据传给服务器后获取最新列表，这里只是示例，不做请求
     const list = importList.value.map((item: any, index: number) => {
         return {
@@ -64,5 +64,5 @@ const handleMany = async () => {
         };
     });
     tableData.value.push(...list);
-};
+};*/
 </script>

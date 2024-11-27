@@ -57,8 +57,8 @@ export const usePermissStore = defineStore('permiss', {
 		return {
 			key: keys ? JSON.parse(keys) : <string[]>[],
 			defaultList: <ObjectList>{
-				TEACHER:['1','2','4','15'],
-				SCHOOL:['1','3','5','8','9','15','7','16']
+				TEACHER:['2','4','10','12','15','17'],
+				SCHOOL:['1','3','5','7','8','9','15','11','13','16']
 			}
 		};
 	},

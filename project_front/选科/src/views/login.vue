@@ -23,14 +23,13 @@
                     </el-input>
                 </el-form-item>
 				<div class="tips">
-					<el-link @click="$router.push('/zhuce')" target="_blank" :underline="false">注册账户</el-link>
+					<el-link @click="$router.push('/register')" target="_blank" :underline="false">注册账户</el-link>
 					<el-link @click="" target="_blank" :underline="false" style="float: right;">忘记密码</el-link>
 				</div>
                 <div class="login-btn">
                     <el-button type="primary" @click="userLogin()">登录</el-button>
                 </div>
                 <el-checkbox class="login-tips" v-model="form.remember" label="记住密码" size="large" />
-                <p class="login-tips">Tips : 用户名和密码随便填。</p>
             </el-form>
         </div>
     </div>

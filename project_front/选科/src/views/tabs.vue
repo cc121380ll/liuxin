@@ -1,50 +1,52 @@
 <!-- 班主任——选科管理 -->
 <template>
-	<div class="container">
+  <div>
     <h3>选科管理</h3>
-		<el-form :model="query" ref="queryForm">
-			 <el-input v-model="query.name" placeholder="姓名" class="search-input mr10"></el-input>
-				<el-select v-model="query.subject" placeholder="学科" class="search-input mr10">
-					<el-option value="化学"></el-option>
-					<el-option value="物理"></el-option>
-					<el-option value="生物"></el-option>
-					<el-option value="地理"></el-option>
-					<el-option value="政治"></el-option>
-					<el-option value="历史"></el-option>
-				</el-select>
-					<el-select v-model="query.status" class="search-input mr10">
-						<el-option label=已选 value=1></el-option>
-						<el-option label=未选 value=0></el-option>
-					</el-select>
-				<el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-		</el-form>
-		<el-button type="info" class="button"  @click="exportXlsx">导出选科名单</el-button>
-		<el-table :data="tableData" border class="table" header-cell-class-name="table-header" style="margin-top: 20px;">
-      <el-table-column label="序号" align="center">
-        <template #default="scope">
-          {{ (scope.$index+1)+(query.pageNum-1)*query.pageSize }}
-        </template>
-      </el-table-column>
-		    <el-table-column prop="name" label="姓名"  align="center"></el-table-column>
-		    <el-table-column prop="studentNumber" label="学号"  align="center"></el-table-column>
-			<el-table-column prop="subject" label="选择科目" align="center"></el-table-column>
-			<el-table-column prop="status" label="状态" align="center">
-					<template #default="scope">
-        <el-tag :type="scope.row.status===1 ? 'success' : 'danger'">
-          {{ scope.row.status===1 ? '启用' : '停用' }}
-        </el-tag>
-      </template>
-			</el-table-column>
-		</el-table>
-    <el-pagination
-        background
-        layout="total, prev, pager, next"
-        :current-page="query.pageNum"
-        :page-size="query.pageSize"
-        :total="pageTotal"
-        @current-change="handlePageChange"
-    ></el-pagination>
-	</div>
+    <div class="container">
+      <el-form :model="query" ref="queryForm">
+        <el-input v-model="query.name" placeholder="姓名" class="search-input mr10"></el-input>
+        <el-select v-model="query.subject" placeholder="学科" class="search-input mr10">
+          <el-option value="化学"></el-option>
+          <el-option value="物理"></el-option>
+          <el-option value="生物"></el-option>
+          <el-option value="地理"></el-option>
+          <el-option value="政治"></el-option>
+          <el-option value="历史"></el-option>
+        </el-select>
+        <el-select v-model="query.status" class="search-input mr10">
+          <el-option label=已选 value=1></el-option>
+          <el-option label=未选 value=0></el-option>
+        </el-select>
+        <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
+      </el-form>
+      <el-button type="info" class="button"  @click="exportXlsx">导出选科名单</el-button>
+      <el-table :data="tableData" border class="table" header-cell-class-name="table-header" style="margin-top: 20px;">
+        <el-table-column label="序号" align="center">
+          <template #default="scope">
+            {{ (scope.$index+1)+(query.pageNum-1)*query.pageSize }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="name" label="姓名"  align="center"></el-table-column>
+        <el-table-column prop="studentNumber" label="学号"  align="center"></el-table-column>
+        <el-table-column prop="subject" label="选择科目" align="center"></el-table-column>
+        <el-table-column prop="status" label="状态" align="center">
+          <template #default="scope">
+            <el-tag :type="scope.row.status===1 ? 'success' : 'danger'">
+              {{ scope.row.status===1 ? '启用' : '停用' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+          background
+          layout="total, prev, pager, next"
+          :current-page="query.pageNum"
+          :page-size="query.pageSize"
+          :total="pageTotal"
+          @current-change="handlePageChange"
+      ></el-pagination>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts" name="tabs">

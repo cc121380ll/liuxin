@@ -1,172 +1,364 @@
 <template>
 	<div class="container">
-		<div class="basic">
-			<h2 class="basic_word">选科基础信息（人）</h2>
-			<span>总人数：4246</span>
-			<span>已选：2123</span>
-			<span>未选：2123</span>
-		</div>
+		<!-- <div class="btn"> -->
+		<!-- <div class="single"></div> -->
 		<div class="single">
-			<h2 class="single_word">单科统计</h2>
-			<schart class="schart" canvasId="bar" :options="options1"></schart>
+			<div class="single_word">单科统计</div>
+			<div ref="singleChartRef" style="width: 1099px; height: 300px;"></div>
 		</div>
+		<!-- <div class="combination"></div> -->
+		<div class="combination_word">组合统计</div>
 		<div class="combination">
-			<h2 class="combination_word">组合统计</h2>
-			<schart class="schart" canvasId="pie" :options="options3"></schart>
-		</div>
-		<!-- <div class="schart-box">
-			<div class="content-title">折线图</div>
-			<schart class="schart" canvasId="line" :options="options2"></schart>
-		</div> -->
-		<!-- <div class="schart-box">
-			<div class="content-title">饼状图</div>
-			<schart class="schart" canvasId="pie" :options="options3"></schart>
-		</div> -->
-		<div class="schart-box">
-			<div class="content-title">环形图</div>
-			<schart class="schart" canvasId="ring" :options="options4"></schart>
+			<div ref="basicChartRef" style="width: 580px; height: auto; margin-left: 101px"></div>
+			<el-table :data="combinationData" :row-style="combinationStyle2" height="700" style="width: 412px; margin-left: 58px">
+				<el-table-column prop="name" label="" width="206" />
+				<el-table-column prop="count" label="人数" width="206" />
+			</el-table>
 		</div>
 	</div>
 </template>
 
-<script setup lang="ts" name="basecharts">
+<!-- <script>
 import Schart from 'vue-schart';
+import {ref} from 'vue';
+import axios from 'axios';
 
-const options1 = {
-	type: 'bar',
-	bgColor: '#ffffff',
-	labels: ['物理', '历史', '化学', '生物', '政治','地理'],
-	datasets: [
-		{
-			label: '物理',
-			fillColor: '#2593fc',
-			data: [100]
-		},
-		{
-			label: '历史',
-			fillColor: '#2593fc',
-			data: [0, 140,]
-		},
-		{
-			label: '化学',
-			fillColor: '#2593fc',
-			data: [0, 0, 230, 0, 0,0]
-		},
-		{
-			label:'生物',
-			fillColor: '#2593fc',
-			data:[0,0,0,100,0,0]
-		},
-		{
-			label:'政治',
-			fillColor: '#2593fc',
-			data:[0,0,0,0,161,0]
-		},
-		{
-			label:'地理',
-			fillColor: '#2593fc',
-			data:[0,0,0,0,0,130]
-		},
-	]
-};
-const options2 = {
-	type: 'line',
-	title: {
-		text: '最近几个月各品类销售趋势图'
-	},
-	bgColor: '#fbfbfb',
-	labels: ['6月', '7月', '8月', '9月', '10月'],
-	datasets: [
-		{
-			label: '家电',
-			data: [234, 278, 270, 190, 230]
-		},
-		{
-			label: '百货',
-			data: [164, 178, 150, 135, 160]
-		},
-		{
-			label: '食品',
-			data: [114, 138, 200, 235, 190]
+export default {
+
+
+ 	const dataList = ref([]);
+
+ 	async function fetchData() {
+ 	try {
+ 		const response = await axios.get('https://example.com/api/school-system/subject-all');
+ 		dataList.value = response.data;
+ 	} catch (error) {
+ 		console.error('获取数据出错：', error);
+ 	}
+ }
+
+// fetchData();
+
+data() {
+		return {
+			sumSubjects:[],//每个班的选科情况
+			options2: {
+				type: "pie",
+				bgColor: '#ffffff',
+				labels: ['物化生', '历化生', '物生政', '历化地'],
+				datasets: [
+					{
+						data: [34, 23, 10, 4]
+					}
+				]
+			},
+			options: {
+				type: "bar",
+				bgColor: "#ffffff",
+				labels: ['物理', '历史', '化学', '生物', '政治', '地理'],
+				datasets: [
+					{
+						label: ['科目'],
+						fillColor: "#2593fc",
+						data: [100, 140, 230, 100, 161, 130]
+					}
+				]
+			},
+			//调用接口获取各科的选科情况
+			async getSubjectSingle() {
+				try {
+					const res1 = await axios.get('https//localhost:8083/api/school-system/subject-single');
+					console.log(res1);
+					//根据后端数据更新图表bar选项中的数据
+					this.options.datasets.data = res1.value;
+				} catch (error) {
+					console.error('获取数据出错：', error);
+				}
+			},
+			async getSubjectSingle() {
+				try {
+					const res2 = await axios.get('https//localhost:8083/api/school-system/subject-all');
+					console.log(res2);
+					//根据后端数据更新图表bar选项中的数据
+					this.sumSubjects = res2.value;
+				} catch (error) {
+					console.error('获取数据出错：', error);
+				}
+			},
 		}
-	]
+	},
+	components: {
+		Schart
+	}
+}
+</script> -->
+
+<script lang="ts" setup>
+import axios from 'axios';
+import { onMounted, ref } from 'vue';
+import * as echarts from 'echarts';
+import {async_get} from "../net/index.js";
+
+// 创建对 DOM 元素的引用
+const singleChartRef = ref(null);
+const basicChartRef = ref(null);
+const combinationData = ref([]);
+
+onMounted(async () => {
+  // 在 DOM 挂载后初始化 ECharts
+  const chart1 = echarts.init(singleChartRef.value);
+  const chart2 = echarts.init(basicChartRef.value);
+  // 设置图表的配置项和数据
+  const  option1 = {
+  xAxis: {
+    type: 'category',
+    data: ['物理', '历史', '化学', '生物', '政治', '地理']
+  },
+  yAxis: {
+    type: 'value'
+  },
+  series: [
+    {
+      data: [120, 200, 150, 80, 70, 110, 130],
+      type: 'bar'
+    }
+  ]
 };
-const options3 = {
-	type: 'pie',
-	title: {
-	},
-	legend: {
-		position: 'left'
-	},
-	bgColor: '#ffffff',
-	labels: ['物理-化学-政治', '物理-化学-生物', '物理-化学-地理', '物理-政治-生物', '物理-政治-地理', '物理-生物-地理', '历史-生物-政治'],
-	datasets: [
-		{
-			data: [334, 278, 190, 235, 260, 200, 141]
-		}
-	]
+
+const option2 = {
+  legend: {
+    y: 'top',
+  },
+  series: [
+    {
+      name: 'Access From',
+      type: 'pie',
+      radius: '45%',
+      avoidLabelOverlap: true,
+      data: [
+        { value: 345, name: '物化生' },
+        { value: 335, name: '历化生' },
+        { value: 580, name: '物生政' },
+        { value: 184, name: '历化地' }
+      ],
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      },
+      label:{
+
+      }
+    }
+  ]
 };
-const options4 = {
-	type: 'ring',
-	title: {
-		text: '环形三等分'
-	},
-	showValue: false,
-	legend: {
-		position: 'bottom',
-		bottom: 40
-	},
-	bgColor: '#fbfbfb',
-	labels: ['vue', 'react', 'angular'],
-	datasets: [
-		{
-			data: [500, 500, 500]
-		}
-	]
-};
-</script>
+
+ // 使用配置项和数据初始化显示图表
+  chart1.setOption(option1);
+  chart2.setOption(option2);
+
+
+ //发起GET请求获取各科的选科情况的数据
+ const getSubjectSingleClass = async () => {
+   try {
+     const data = await async_get('/api/teacher-system/subject-single');
+     const keyMapping = {
+       physics: '物理',
+       history: '历史',
+       chemistry: '化学',
+       creature: '生物',
+       geography: '地理',
+       politics: '政治'
+     };
+     const keys = Object.keys(data).map(key => keyMapping[key]);
+     console.log(keys)
+     const values = Object.values(data).map(value => value === null ? 0 : value);
+     chart1.hideLoading(); // 数据加载完毕，隐藏加载动画
+     //根据后端数据更新图表chart1选项中的数据
+     chart1.setOption({
+       title: {
+         text: '科目统计'
+       },
+       tooltip: {
+         trigger: 'axis'
+       },
+       xAxis: {
+         type: 'category',
+         data: keys
+       },
+       yAxis: {
+         type: 'value'
+       },
+       series: [{
+         name: '数量',
+         type: 'bar',
+         data: values
+       }]
+     });
+   } catch (error) {
+     console.error('Error fetching data:', error);// 处理错误，如显示错误信息
+   }
+ };
+  await getSubjectSingleClass();
+ // 发起GET请求获取选科组合的情况的数据
+ const getSubjectCombinationClass = async () => {
+   try {
+     const data = await async_get('/api/teacher-system/subject-all'); // 替换为你的数据URL
+     const dealData = data.map(i=>({
+       name: i.name,
+       value: i.count
+     }));
+     chart2.hideLoading(); // 数据加载完毕，隐藏加载动画
+     //根据后端数据更新图表chart2选项中的数据
+     chart2.setOption({
+       series: [{
+         data: dealData // 假设返回的数据结构中包含product字段
+       }]
+     });
+     //后台获取数据动态更新CombinationTable2表格的数据
+     combinationData.value = data;
+   } catch (error) {
+     console.error('Error fetching data:', error);// 处理错误，如显示错误信息
+   }
+ };
+ await getSubjectCombinationClass();
+
+});
+
+//自定义表格的样式
+const combinationStyle2 = (arg3) => {
+  return {
+    fontSize: '14px',
+    fontFamily: 'Microsoft Yahei',
+    fontWeight: 'normal',
+    lineHeight: '20px',
+    textAlign: 'left',
+    borderRadius: '4px',
+  }
+}
+//表格初始化所用数据
+/*const combinationData = [
+  {
+    combinationStyles: '物化生',
+    sumNum: '50'
+  },
+  {
+    combinationStyles: '物化政',
+    sumNum: '12'
+  },
+  {
+    combinationStyles: '物化地',
+    sumNum: '6'
+  },
+  {
+    combinationStyles: '物生地',
+    sumNum: '10'
+  },
+  {
+    combinationStyles: '物生政',
+    sumNum: '6'
+  },
+  {
+    combinationStyles: '物地政',
+    sumNum: '14'
+  },
+  {
+    combinationStyles: '历化生',
+    sumNum: '30'
+  },
+]*/
+</script> 
 
 <style scoped>
-.basic{
-	margin-left: 20px;
+.container {
+	/*width: 1180px;
+	height: 1249px;*/
+  width:95%;
+	font-family: Roboto;
+	color: rgba(16, 16, 16, 1);
+	font-size: 14px;
+
+	border-radius: 4px;
+	background-color: rgba(255, 255, 255, 1);
 }
-.basic_word{
-	border-left: 3px solid orange;
-	padding: 30px;
+
+button {
+	width: 94px;
+	height: 30px;
+
+	margin-top: 65px;
+
+	border-radius: 4px;
+	border: 1px solid #3952FD;
+
+	text-align: center;
+	line-height: 20px;
+	font-size: 14px;
+	font-family: Roboto;
 }
-span{
-	margin: 15px;
-	font-size: 20px;
+
+.stu_view {
+	margin-left: 18px;
+
+	color: #3952FD;
+	background-color: #FFFFFF;
 }
-.single{
-	margin: 20px;
+
+.statist_analysis {
+	margin-left: 27px;
+
+	color: #FFFFFF;
+	background-color: #3952FD;
 }
-.single_word{
-	border-left: 3px solid blue;
-	padding: 30px;
+
+.single {
+	/* width: 722px; */
+	height: 339px;
+
+	margin-left: 37px;
+	margin-top: 21px;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: left;
 }
-.schart-box {
-	display: inline-block;
-	margin: 20px;
+
+.single_word {
+	width: 129px;
+	height: 25px;
+
+	font-size: 14px;
+	text-align: center;
+	line-height: 20px;
+	color: #101010;
+
+	border-left: 4px solid blue;
 }
-.combination{
-	margin: 20px;
+
+.combination {
+	height: 700px;
+	margin-top: 15px;
+	display: flex;
 }
-.combination_word{
-	border-left: 3px solid red;
-	padding: 30px;
+
+.combination_word {
+	width: 129px;
+	height: 25px;
+
+	margin-left: 37px;
+	margin-top: 198px;
+
+	align-items: left;
+
+	font-size: 14px;
+	text-align: center;
+	line-height: 20px;
+	color: #101010;
+
+	border-left: 4px solid blue;
 }
-.schart {
-	width: 650px;
-	height: 500px;
-	margin: auto;
-}
-.content-title {
-	clear: both;
-	font-weight: 400;
-	line-height: 50px;
-	margin: 10px 0;
-	font-size: 22px;
-	color: #1f2f3d;
-}
+
 </style>

@@ -37,7 +37,7 @@ function deleteAccessToken(){
 	localStorage.removeItem(authItemName)
 	sessionStorage.removeItem(authItemName)
 }
-function storeAccessTokenAndRole(username,token,remember,role,expire){
+function storeAccessTokenAndRole(username,token,remember,role,expire,avatar){
 	const authObj = {
 		username:username,
 		token:token,
@@ -66,18 +66,40 @@ function get(url,success, failure = defaultFailure) {
 function deletes(url, success , failure = defaultFailure){
 	internalDelete(url, accessHeader(), success, failure)
 }
-function async_post(url, data, success, failure = defaultFailure) {
+function async_post(url, data, header, success, failure = defaultFailure) {
 	async_internalPost(url, data, accessHeader(), defaultError, failure)
 		.then(success)
 		.catch(err=>{
 			failure(err)
 		});
 }
-async function async_internalPost(url, data, header, error = defaultError, failure) {
+async function async_internalPost(url, data, header, success, error = defaultError, failure) {
 	try {
 		const response = await axios.post(url, data, { headers: header });
 		if (response.data.code === 200) {
 			ElMessage.success("操作成功")
+			return response.data.data;
+		} else {
+			ElMessage.error(response.data.message)
+			return null;
+		}
+
+	} catch (err) {
+		error(err); // 这里可以直接抛出错误，或者创建一个自定义错误对象
+	}
+}
+/*function async_get(url, header, success, failure = defaultFailure){
+	async_internalGet(url, accessHeader(), defaultError, failure)
+		.then(success)
+		.catch(err=>{
+			failure(err)
+		});
+}*/
+async function async_get(url, header = accessHeader(), error = defaultError) {
+	try {
+		const response = await axios.get(url, { headers: header });
+		if (response.data.code === 200) {
+			//ElMessage.success("操作成功")
 			return response.data.data;
 		} else {
 			ElMessage.error(response.data.message)
@@ -135,8 +157,8 @@ function login(username,password,remember,success,failure=defaultFailure){
 		'Content-Type':'application/x-www-form-urlencoded'
 	},(data)=>{
 		const permiss = usePermissStore();
-		storeAccessTokenAndRole(data.username,data.token,remember,data.role,data.expire)
-		const keys = permiss.defaultList[data.role === 'TEACHER'?'TEACHER':'SCHOOL']; // 根据用户名获取权限列表
+		storeAccessTokenAndRole(data.username,data.token,remember,data.role,data.expire,data.avatar)
+		const keys = permiss.defaultList[data.role === 'TEACHER'?'TEACHER':'SCHOOL'];
 		permiss.handleSet(keys)
 		ElMessage.success(`登陆成功，欢迎${data.username}来到我们的系统`)
 		localStorage.setItem('ms_keys', JSON.stringify(keys));
@@ -222,4 +244,4 @@ function getView(url,success,failure = defaultFailure){
 		success(data)
 	},failure)
 }
-export {login,unauthorized,get,post,logout,search,getMyData,deleteData,editData,S_editData,getView,put,getWithType,takeAccessToken}
+export {login,unauthorized,get,post,logout,search,getMyData,deleteData,editData,S_editData,getView,put,getWithType,takeAccessToken,async_get}

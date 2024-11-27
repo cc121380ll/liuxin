@@ -1,6 +1,5 @@
 <!--学校——选科管理 -->
 <template>
-
 	<div>
     <h3>选科管理</h3>
 		<div class="container">

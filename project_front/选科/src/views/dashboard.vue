@@ -1,119 +1,100 @@
 <!-- 首页 -->
 
 <template>
-	<div>
-		<el-row :gutter="20">
-			<el-col :span="8">
-				<el-card shadow="hover" class="mgb20" style="height: 252px">
-					<div class="user-info">
-						<el-avatar :size="120" :src="imgurl" />
-						<div class="user-info-cont">
-							<div class="user-info-name">{{ name }}</div>
-						</div>
-					</div>
-					<div class="user-info-list">
-						 登录时间：
-						<span>{{formattedDate}}</span>
-					</div>
-<!--					<div class="user-info-list">
-						上次登录地点：
-						<span>东莞</span>
-					</div>-->
-          <div class="user-info-list">
-            用户角色：
-            <span>{{ role }}</span>
-          </div>
-				</el-card>
-			</el-col>
-			<el-col :span="16">
-				<el-row :gutter="20" class="mgb20">
-					<el-col :span="12">
-						<el-card shadow="hover" :body-style="{ padding: '0px' }">
-							<div class="grid-content grid-con-1">
-								<el-icon class="grid-con-icon"><User /></el-icon>
-								<div class="grid-cont-right">
-									<div class="grid-num">{{num}}</div>
-									<div>学生总人数</div>
-								</div>
-							</div>
-						</el-card>
-					</el-col>
-					<el-col :span="12">
-						<el-card shadow="hover" :body-style="{ padding: '0px' }">
-							<div class="grid-content grid-con-2">
-								<el-icon class="grid-con-icon"><ChatDotRound /></el-icon>
-								<div class="grid-cont-right">
-									<div class="grid-num">321</div>
-									<div>系统消息</div>
-								</div>
-							</div>
-						</el-card>
-					</el-col>
-				</el-row>
-			</el-col>
-		</el-row>
-		<div class="container" v-permiss="16">
-		    <div class="handle-box" style="display: flex; align-items: center; justify-content: center;">
-<!--		        <el-upload
-		            action="#"
-		            :limit="1"
-		            accept=".xlsx, .xls"
-		            :show-file-list="false"
-		            :before-upload="beforeUpload"
-		        >
-              <el-icon class="el-icon&#45;&#45;upload"><upload-filled /></el-icon>
-              <div class="upload-area"  @dragover.prevent="handleDragOver" @drop.prevent="handleFileDrop">
-                拖拽文件到这里上传
+<div style="height: 100%;display: flex;justify-content: center;align-items: center">
+<!--    		<el-row :gutter="20">
+          <el-col :span="8">
+            <el-card shadow="hover" class="mgb20" style="height: 252px">
+              <div class="user-info">
+                <el-avatar :size="120" :src="imgurl" />
+                <div class="user-info-cont">
+                  <div class="user-info-name">{{ name }}</div>
+                </div>
               </div>
-		        </el-upload>-->
-          <el-upload
-              class="upload-demo"
-              drag
-              action="http://jsonplaceholder.typicode.com/api/posts/"
-              :limit="1"
-              accept=".xlsx, .xls"
-              :show-file-list="false"
-              :before-upload="beforeUpload"
-          >
-            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-            <div class="el-upload__text" @dragover.prevent="handleDragOver" @drop.prevent="handleFileDrop">
-              点击或拖拽上传
-            </div>
-          </el-upload>
-<!--          <el-icon class="el-icon&#45;&#45;upload"><upload-filled /></el-icon>
-          <div class="my-btn" @click="downloadTemplate">模 板
-          &lt;!&ndash; 下载模板a标签 &ndash;&gt;
-          <a ref="downloadTemplate" style="display: none" href="./学生信息模版示例.xlsx"></a>
-          </div>-->
-          <el-upload
-              class="upload-demo"
-              drag
-              action="http://jsonplaceholder.typicode.com/api/posts/"
-              multiple
-          >
-            <el-icon class="el-icon--upload"><document/></el-icon>
-            <div class="el-upload__text"  @click="downloadTemplate">
-              点击下载导入模板
-              <a ref="downloadTemplate" style="display: none" href="./学生信息模版示例.xlsx"/>
-            </div>
-          </el-upload>
-		    </div>
-		</div>
-	</div>
+              <div class="user-info-list">
+                 登录时间：
+                <span>{{formattedDate}}</span>
+              </div>
+    &lt;!&ndash;					<div class="user-info-list">
+                上次登录地点：
+                <span>东莞</span>
+              </div>&ndash;&gt;
+              <div class="user-info-list">
+                用户角色：
+                <span>{{ role }}</span>
+              </div>
+            </el-card>
+          </el-col>
+          <el-col :span="16">
+            <el-row :gutter="20" class="mgb20">
+              <el-col :span="12">
+                <el-card shadow="hover" :body-style="{ padding: '0px' }">
+                  <div class="grid-content grid-con-1">
+                    <el-icon class="grid-con-icon"><User /></el-icon>
+                    <div class="grid-cont-right">
+                      <div class="grid-num">{{num}}</div>
+                      <div>学生总人数</div>
+                    </div>
+                  </div>
+                </el-card>
+              </el-col>
+              <el-col :span="12">
+                <el-card shadow="hover" :body-style="{ padding: '0px' }">
+                  <div class="grid-content grid-con-2">
+                    <el-icon class="grid-con-icon"><ChatDotRound /></el-icon>
+                    <div class="grid-cont-right">
+                      <div class="grid-num">321</div>
+                      <div>系统消息</div>
+                    </div>
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+          </el-col>
+        </el-row>-->
+    <div style="display: flex;flex-direction: column;align-items: center" v-permiss="16">
+      <el-steps style="width: 1000px" :active="active" :space="600" finish-status="success" align-center>
+        <el-step title="下载模板" ></el-step>
+        <el-step title="上传信息"></el-step>
+      </el-steps>
+      <div class="handle-box" style="display: flex; align-items: center; justify-content: center;">
+        <div class="download-demo"  @click="downloadTemplate">
+          <el-icon style="font-size: 67px; margin-bottom: 16px;color: #a9abb1"><download/></el-icon>
+          <div class="el-upload__text">
+            点击下载导入模板
+            <a ref="downloadTemplateRef" href="./学生信息模版示例.xlsx"/>
+          </div>
+        </div>
+        <el-upload
+            class="upload-demo"
+            drag
+            action=" http://localhost:8083/api/school-system/upload"
+            :limit="1"
+            accept=".xlsx, .xls"
+            :show-file-list="false"
+            :before-upload="beforeUpload"
+            :on-success="()=>{active = 2;}"
+        >
+          <el-icon class="el-icon--upload"><upload/></el-icon>
+          <div class="el-upload__text" @dragover.prevent="handleDragOver" @drop.prevent="handleFileDrop">
+            点击或拖拽上传
+          </div>
+        </el-upload>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts" name="dashboard">
 
 
-import {Delete, Search, CirclePlusFilled, UploadFilled, Document} from '@element-plus/icons-vue';
-import Schart from 'vue-schart';
+import {Delete, Search, CirclePlusFilled, UploadFilled, Document, Download, Upload} from '@element-plus/icons-vue';
 import { ref } from 'vue';
-import imgurl from '../assets/img/img.jpg';
 import {ElMessage, UploadProps} from 'element-plus';
 import * as XLSX from 'xlsx';
-import axios from 'axios';
-import {DragEvents} from "element-plus/es/components/tree/src/model/useDragNode";
 import {S_editData, get, getView} from "../net/index.js";
+import {BaiduMap} from "vue-baidu-map-3x";
+import Charts from "./charts.vue";
 
 
 const name = JSON.parse(sessionStorage.getItem("access_token")||localStorage.getItem("access_token")).username;
@@ -121,6 +102,8 @@ const role = JSON.parse(sessionStorage.getItem("role"));
 const dragEnter = ref(false);
 const importList = ref<any>([]);
 const num = ref(0);
+const active = ref(0);
+const downloadTemplateRef = ref(null);
 function formatDate(date) {
   const year = date.getFullYear();
   const month = date.getMonth() + 1; // getMonth() 返回的月份是从0开始的
@@ -134,7 +117,7 @@ const date = new Date();
 const formattedDate = formatDate(date);
 console.log(formattedDate); // 输出: "2024-12-01" (假设date是2024年12月1日的Date对象)
 
-const getNum = ()=>{
+/*const getNum = ()=>{
   console.log(role)
   if(role ==='SCHOOL'){
     getView('/api/school-system/num',(data)=>{
@@ -146,7 +129,7 @@ const getNum = ()=>{
     })
   }
 }
-getNum()
+getNum()*/
 const handleDragOver = (e: DragEvent) => {
   dragEnter.value = true;
   e.preventDefault();
@@ -228,15 +211,9 @@ const template = () => {
   })
 };*/
 }
-</script>
-<script lang="ts" name="dashboard">
-export default {
-  methods: {
-// 点击模板按钮触发a下载文件
-    downloadTemplate() {
-      this.$refs.downloadTemplate.dispatchEvent(new MouseEvent('click'))
-    }
-  }
+const downloadTemplate = ()=> {
+  downloadTemplateRef.value.dispatchEvent(new MouseEvent('click'))
+  active.value = 1;
 }
 </script>
 
@@ -384,6 +361,33 @@ export default {
 }
 </style>-->
 <style scoped>
+.map{
+  width: 100%;
+  height: 300px;
+}
+.download-demo{
+  display: flex;
+  margin: 20px;
+  width: 400px;
+  height: 200px;
+  background-color: white;
+  border: 1px dashed #d9d9d9;
+  border-radius: 5px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.download-demo:hover{
+  cursor: pointer;
+  border-color: #409eff;
+  border-style: dashed;
+}
+/deep/ .el-upload{
+  height: 100%;
+}
+/deep/ .el-upload-dragger{
+  height: 100%;
+}
 .upload-demo{
   margin: 20px;
   width: 400px;
