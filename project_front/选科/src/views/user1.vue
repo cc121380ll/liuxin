@@ -68,7 +68,7 @@
                 <el-input class="form-input" v-model="form.code" placeholder="请输入验证码">
                   <template #append>
                     <el-button
-                        @click="send"
+                        @click="send(form.phone)"
                         :disabled="!isPhoneValid || coldTime > 0"
                     > {{coldTime > 0 ? '请稍后 ' + coldTime + ' 秒' : '获取验证码'}}</el-button>
                   </template>
@@ -177,9 +177,9 @@ const setImage = (e: any) => {
   };
   reader.readAsDataURL(file);
 };
-const send = () => {
+const send = (phone) => {
   coldTime.value = 60
-  get('', () => {
+  get(`/api/auth/ask-code?phone=${phone}&type=reset`, () => {
     ElMessage.success('验证码已发送到手机')
     const handle = setInterval(() => {
       coldTime.value--

@@ -48,7 +48,7 @@
           >
             <template #append>
               <el-button
-                  @click="send"
+                  @click="send(param.phone)"
                   :disabled="!isPhoneValid || coldTime > 0"
               > {{coldTime > 0 ? '请稍后 ' + coldTime + ' 秒' : '获取验证码'}}</el-button>
             </template >
@@ -134,9 +134,9 @@ const onValidate = (prop, isValid) => {
   if(prop === 'phone')
     isPhoneValid.value = isValid
 }
-const send = () => {
+const send = (phone) => {
   coldTime.value = 60
-  get('', () => {
+  get(`/api/auth/ask-code?phone=${phone}&type=register`, () => {
     ElMessage.success('验证码已发送到手机')
     const handle = setInterval(() => {
       coldTime.value--
@@ -150,7 +150,18 @@ const send = () => {
   })
 }
 const submitForm = (form) =>{
-  post()
+  post('/api/auth/register',{
+    province:form.info.zone[0],
+    city:form.info.zone[1],
+    county:form.info.zone[2],
+    schoolName:form.school,
+    phone:form.phone,
+    password:form.password,
+    code:form.code
+  },()=>{
+    ElMessage.success("注册成功");
+    router.push('/login');
+  })
 }
 const tags = useTagsStore();
 tags.clearTags();
