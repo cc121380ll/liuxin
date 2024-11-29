@@ -18,8 +18,17 @@ export default defineConfig({
 	],
 	optimizeDeps: {
 		include: ['schart.js']
+	},
+	esbuild: {
+		//...
+		supported: {
+			bigint: true
+		},
+		// ...
+	},
+	server: {
+		port: 7673, // 指定启动端口
 	}
-
 });
 
 /*

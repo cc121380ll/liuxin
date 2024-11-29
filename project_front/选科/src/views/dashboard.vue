@@ -93,7 +93,6 @@ import { ref } from 'vue';
 import {ElMessage, UploadProps} from 'element-plus';
 import * as XLSX from 'xlsx';
 import {S_editData, get, getView} from "../net/index.js";
-import {BaiduMap} from "vue-baidu-map-3x";
 import Charts from "./charts.vue";
 
 

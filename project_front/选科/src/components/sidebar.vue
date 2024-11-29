@@ -56,7 +56,21 @@ import { useSidebarStore } from '../store/sidebar';
 import { useRoute} from 'vue-router';
 import {watch,ref} from "vue";
 
-const items = [
+interface MenuItem {
+  icon: string;
+  index: string;
+  title: string;
+  permiss: string;
+  subs?: SubMenuItem[]; // 可选的 subs 属性
+}
+
+interface SubMenuItem {
+  index: string;
+  title: string;
+  permiss: string;
+  subs?: SubMenuItem[]; // 子菜单项也可以有子项
+}
+const items: MenuItem[] = [
   {
     icon: 'Odometer',
     index: '/dashboard',

@@ -7,17 +7,14 @@ import { usePermissStore } from './store/permiss';
 import 'element-plus/dist/index.css';
 import './assets/css/icon.css';
 import axios from 'axios'
-import { VueCropper } from "vue-cropper";
 import "vue-cropper/dist/index.css";
 
-
-
 const app = createApp(App);
-app.use(VueCropper);
 app.use(createPinia());
 app.use(router);
-axios.defaults.baseURL='http://localhost:8083'
-axios.defaults.withCredentials = true;
+//axios.defaults.baseURL='http://localhost:8083'
+axios.defaults.baseURL= process.env.VUE_APP_API_BASE_URL
+axios.defaults.withCredentials = process.env.VUE_APP_API_WITH_CREDENTIALS === 'true';
 // 注册elementplus图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component);
