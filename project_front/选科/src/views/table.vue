@@ -190,7 +190,7 @@ getDataAndSendToBackend();*/
     });
 };*/
 const getStuData = async () => {
-  const data = await getMyData('http://localhost:8083/api/teacher-system/students', searchForm)
+  const data = await getMyData('http://115.29.41.122:9662/api/teacher-system/students', searchForm)
   tableData.value=data.rows
   pageTotal.value=data.total
 }

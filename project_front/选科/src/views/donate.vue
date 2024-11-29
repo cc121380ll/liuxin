@@ -143,7 +143,7 @@ getDataAndSendToBackend();*/
     });
 };*/
 const getSubData = async () => {
-  const data = await getMyData('http://localhost:8083/api/school-system/school-subject', query)
+  const data = await getMyData('http://115.29.41.122:9662/api/school-system/school-subject', query)
   tableData.value=data.rows
   pageTotal.value=data.total
 }

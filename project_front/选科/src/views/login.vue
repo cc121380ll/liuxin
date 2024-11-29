@@ -24,7 +24,7 @@
                 </el-form-item>
 				<div class="tips">
 					<el-link @click="$router.push('/register')" target="_blank" :underline="false">注册账户</el-link>
-					<el-link @click="" target="_blank" :underline="false" style="float: right;">忘记密码</el-link>
+<!--					<el-link @click="" target="_blank" :underline="false" style="float: right;">忘记密码</el-link>-->
 				</div>
                 <div class="login-btn">
                     <el-button type="primary" @click="userLogin()">登录</el-button>

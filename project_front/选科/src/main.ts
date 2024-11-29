@@ -12,8 +12,8 @@ import "vue-cropper/dist/index.css";
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
-//axios.defaults.baseURL='http://localhost:8083'
-axios.defaults.baseURL= 'http://115.29.41.122:9662'
+axios.defaults.baseURL='http://localhost:8083'
+//axios.defaults.baseURL= 'http://115.29.41.122:9662'
 axios.defaults.withCredentials = true;
 // 注册elementplus图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

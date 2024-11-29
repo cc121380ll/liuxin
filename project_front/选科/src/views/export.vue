@@ -187,13 +187,13 @@ getData();*/
 };*/
 
 const getStuData = async () => {
-  const data = await getMyData('http://localhost:8083/api/school-system/students', query)
+  const data = await getMyData('http://115.29.41.122:9662/api/school-system/students', query)
   tableData.value=data.rows
   pageTotal.value=data.total
 }
 getStuData();
 const exportXlsx = () =>{
-  window.open('http://localhost:8083/api/school-system/export?token='+takeAccessToken())
+  window.open('http://115.29.41.122:9662/api/school-system/export?token='+takeAccessToken())
 }
 const handleSearch = () => {
   search('/api/school-system/students',query,(data)=>{

@@ -68,7 +68,7 @@
         <el-upload
             class="upload-demo"
             drag
-            action=" http://localhost:8083/api/school-system/upload"
+            :action="reqUrl"
             :limit="1"
             accept=".xlsx, .xls"
             :show-file-list="false"
@@ -95,7 +95,7 @@ import * as XLSX from 'xlsx';
 import {S_editData, get, getView} from "../net/index.js";
 import Charts from "./charts.vue";
 
-
+const reqUrl = 'http://115.29.41.122:9662/api/school-system/upload'
 const name = JSON.parse(sessionStorage.getItem("access_token")||localStorage.getItem("access_token")).username;
 const role = JSON.parse(sessionStorage.getItem("role"));
 const dragEnter = ref(false);

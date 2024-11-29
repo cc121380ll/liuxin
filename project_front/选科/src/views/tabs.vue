@@ -130,7 +130,7 @@ const getDataAndSendToBackend = async () => {
 
 getDataAndSendToBackend();*/
 const getStuData = async () => {
-  const data = await getMyData("http://localhost:8083/api/teacher-system/collect-information",query)
+  const data = await getMyData("http://115.29.41.122:9662/api/teacher-system/collect-information",query)
   tableData.value=data.rows
   pageTotal.value=data.total
 }
@@ -179,7 +179,7 @@ const exportXlsx = () => {
     XLSX.utils.book_append_sheet(new_workbook, WorkSheet, '第一页');
     XLSX.writeFile(new_workbook, `表格.xlsx`);*/
   /*exportXlsx('/api/')*/
-  window.open('http://localhost:8083/api/teacher-system/export?token='+takeAccessToken())
+  window.open('http://115.29.41.122:9662/api/teacher-system/export?token='+takeAccessToken())
 };
 
 
