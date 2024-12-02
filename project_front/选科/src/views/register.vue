@@ -136,32 +136,40 @@ const onValidate = (prop, isValid) => {
 }
 const send = (phone) => {
   coldTime.value = 60
-  get(`/api/auth/ask-code?phone=${phone}&type=register`, () => {
-    ElMessage.success('验证码已发送到手机')
-    const handle = setInterval(() => {
-      coldTime.value--
-      if(coldTime.value === 0) {
-        clearInterval(handle)
-      }
-    }, 1000)
-  }, (message) => {
-    ElMessage.warning(message)
-    coldTime.value = 0
-  })
+  get({
+    url: `/api/auth/ask-code?phone=${phone}&type=register`,
+    success: () => {
+      ElMessage.success('验证码已发送到手机')
+      const handle = setInterval(() => {
+        coldTime.value--
+        if (coldTime.value === 0) {
+          clearInterval(handle)
+        }
+      }, 1000)
+    },
+    failure: (message) => {
+      ElMessage.warning(message)
+      coldTime.value = 0
+    }
+  });
 }
 const submitForm = () =>{
-  post('/api/auth/register',{
-    province:param.info.zone[0],
-    city:param.info.zone[1],
-    county:param.info.zone[2],
-    schoolName:param.info.school,
-    phone:param.phone,
-    password:param.password,
-    code:param.code
-  },()=>{
-    ElMessage.success("注册成功");
-    router.push('/login');
-  })
+  post({
+    url: '/api/auth/register',
+    data:{
+      province:param.info.zone[0],
+      city:param.info.zone[1],
+      county:param.info.zone[2],
+      schoolName:param.info.school,
+      phone:param.phone,
+      password:param.password,
+      code:param.code
+    },
+    success: ()=>{
+      ElMessage.success("注册成功");
+      router.push('/login');
+    }
+  });
 }
 const tags = useTagsStore();
 tags.clearTags();

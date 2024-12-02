@@ -126,14 +126,18 @@ const handleDelete = (index: number) => {
 	})
       .then(() => {
         // 先从服务器删除数据
-        deletes(`/api/school-system/school-subject/delete/${tableData.value[index].id}`,()=>{
-          // 服务器删除成功后，更新本地数组
-          ElMessage.success('删除成功');
-          tableData.value.splice(index, 1);
-        },()=>{
-          // 如果服务器删除失败，通知用户
-          ElMessage.error('删除失败');
-        })
+        deletes({
+          url: `/api/school-system/school-subject/delete/${tableData.value[index].id}`,
+          success:()=>{
+            // 服务器删除成功后，更新本地数组
+            ElMessage.success('删除成功');
+            tableData.value.splice(index, 1);
+          },
+          failure:()=>{
+            // 如果服务器删除失败，通知用户
+            ElMessage.error('删除失败');
+          }
+        });
       })
       .catch(() => {
         // 用户取消操作
@@ -158,12 +162,12 @@ const updateData = async (row: TableItem) => {
     success: () => {
       ElMessage.success("添加成功");
       getSubData()
-    },
+    }
    /* header: {
       'Authorization': `Bearer ${takeAccessToken()}`,
       'Content-Type': 'application/json'
     }*/
-  })
+  });
   /*idEdit.value ? (tableData.value[idx] = row) : tableData.value.unshift(row);
   console.log(tableData.value);*/
   closeDialog();

@@ -54,8 +54,9 @@
 	</div>
 </template>
 <script setup lang="ts">
-import {onMounted, ref} from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import { useSidebarStore } from '../store/sidebar';
+import { useUserStore } from "../store/user";
 import { useRouter } from 'vue-router';
 import {get, logout} from '../net/index.js'
 import {ArrowDown} from "@element-plus/icons-vue";
@@ -63,19 +64,23 @@ import {ArrowDown} from "@element-plus/icons-vue";
 const username = JSON.parse(sessionStorage.getItem("access_token")||localStorage.getItem("access_token")).username
 
 const sidebar = useSidebarStore();
-const avatar = ref('');
+const userStore = useUserStore();
 // 侧边栏折叠
 const collapseChage = () => {
 	sidebar.handleCollapse();
 };
 
+const avatar = computed(() => userStore.avatar);
 onMounted(() => {
 	if (document.body.clientWidth < 1500) {
 		collapseChage();
 	}
-  get('/api/auth/load-avatar', (data)=>{
-    avatar.value = data;
-  })
+  get({
+    url: '/api/auth/load-avatar',
+    success: (data)=>{
+      userStore.setAvatar(data);
+    }
+  });
 });
 
 const router = useRouter();

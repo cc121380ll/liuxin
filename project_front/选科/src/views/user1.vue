@@ -15,7 +15,7 @@
                                   <i class="el-icon-lx-favor"></i>
                               </div>-->
         </div>
-        <div class="user-footer">
+        <div class="user-footer" v-permiss="18">
           <div class="user-footer-item">
             <el-statistic title="学生总数" :value="num[0]" />
           </div>
@@ -52,9 +52,10 @@
           </el-tab-pane>
           <el-tab-pane name="label2" label="修改密码" class="user-tabpane"
                        style="display: flex; align-items: center; justify-content: center;"
-                       v-permiss = "18"
           >
-            <h3 v-if="!(role === 'SCHOOL')" style="color:#909399">您无权使用此功能</h3>
+            <div v-if="!(role === 'SCHOOL')" style="display: flex; align-items: center; justify-content: center; height: 372px">
+              <h3 style="color:#909399;">您无权使用此功能</h3>
+            </div>
             <el-form class="w500"
                      v-else
                      :rules="rules"
@@ -102,11 +103,12 @@
 <script setup lang="ts">
 import {reactive, ref, computed, onUnmounted, onMounted} from 'vue';
 import {ElMessage, FormRules} from 'element-plus';
-import {get, post} from "../net/index.js";
+import {get, post, takeAccessToken} from "../net/index.js";
 import {Iphone} from "@element-plus/icons-vue";
 import { VueCropper } from 'vue-cropper';
 import 'vue-cropper/dist/index.css';
 import {getAdapter} from "axios";
+import {useUserStore} from "../store/user";
 // import TabsComp from '../element/tabs.vue';
 
 // const name = localStorage.getItem('ms_username');
@@ -125,11 +127,12 @@ const avatar = ref('');
 const activeName = ref('label1');
 const avatarImg = ref(avatar);
 const imgSrc = ref(avatar);
-const cropImg = ref('');
 const cropper = ref(null);
 const num = ref([]);
 const isPhoneValid = ref(false)
 const coldTime = ref(0);
+
+const userStore = useUserStore();
 
 const validatePassword = (rule, value, callback) => {
   if (value === '') {
@@ -164,7 +167,7 @@ const rules: FormRules = {
 
 
 onMounted(()=>{
-  getNum();
+  if(role == 'SCHOOL') getNum();
   getAvatar();
 })
 const onValidate = (prop, isValid) => {
@@ -191,58 +194,92 @@ const setImage = (e: any) => {
 };
 const send = (phone) => {
   coldTime.value = 60
-  get(`/api/auth/ask-code?phone=${phone}&type=reset`, () => {
-    ElMessage.success('验证码已发送到手机')
-    const handle = setInterval(() => {
-      coldTime.value--
-      if(coldTime.value === 0) {
-        clearInterval(handle)
-      }
-    }, 1000)
-  }, (message) => {
-    ElMessage.warning(message)
-    coldTime.value = 0
-  })
+  get({
+    url: `/api/auth/ask-code?phone=${phone}&type=reset`,
+    success: () => {
+      ElMessage.success('验证码已发送到手机')
+      const handle = setInterval(() => {
+        coldTime.value--
+        if (coldTime.value === 0) {
+          clearInterval(handle)
+        }
+      }, 1000)
+    },
+    failure: (message) => {
+      ElMessage.warning(message)
+      coldTime.value = 0
+    }
+  });
 }
 const saveAvatar = () => {
-  if(cropper.value)
-    cropper.value.getCropData((data) => {
-      cropImg.value = data
-    }); // 获取裁剪后的图片数据
-  post('/api/school-system/reset/school',{
-    phone:null,
-    code:null,
-    oldPassword:null,
-    newPassword:null,
-    avatar:cropImg.value,
-    type:'avatar'
-  },()=>{
-    avatarImg.value = cropImg.value;
-    ElMessage.success("设置成功")
-  },()=>{
-    ElMessage.error("设置失败，请重试")
-  });
+  cropper.value.getCropData((data) => {
+    if(role == 'SCHOOL') {
+      post({
+        url: '/api/auth/reset/school',
+        data: {
+          phone: null,
+          code: null,
+          oldPassword: null,
+          newPassword: null,
+          avatar: data,
+          type: 'avatar'
+        },
+        success: () => {
+          avatarImg.value = data;
+          userStore.setAvatar(data);
+          ElMessage.success("设置成功")
+        },
+        failure: () => {
+          ElMessage.error("设置失败，请重试")
+        }
+    });
+    }else {
+      post({
+        url: '/api/auth/reset/teacher',
+        data: data,
+        success: () => {
+          avatarImg.value = data;
+          userStore.setAvatar(data);
+          ElMessage.success("设置成功")
+        },
+        failure: () => {
+          ElMessage.error("设置失败，请重试")
+        },
+        header: {
+          'Content-Type': 'text/plain',
+          'Authorization': `Bearer ${takeAccessToken()}`
+        },
+      });
+    }
+  }); // 获取裁剪后的图片数据并响应
 };
 
 const resetPassword = () => {
-  post('/api/school-system/reset/school',{
-    phone:form.phone,
-    code:form.code,
-    oldPassword:form.oldPassword,
-    newPassword:form.newPassword,
-    avatar:null,
-    type:'pass'
-  },()=>{
-    avatarImg.value = cropImg.value;
-    ElMessage.success("设置成功")
-  },()=>{
-    ElMessage.error("设置失败，请重试")
+  post({
+    url: '/api/auth/reset/school',
+    data:{
+      phone:form.phone,
+      code:form.code,
+      oldPassword:form.oldPassword,
+      newPassword:form.newPassword,
+      avatar:null,
+      type:'pass'
+    },
+    success:()=>{
+      ElMessage.success("设置成功")
+    },
+    failure:()=>{
+      ElMessage.error("设置失败，请重试")
+    }
   });
 }
 const getNum = () => {
   try{
-    get('/api/school-system/num',(data)=>{
-      num.value = data;
+    get({
+      url: '/api/school-system/num',
+      success:(data)=>{
+        num.value = data;
+      }
     });
   }catch (error) {
     console.error('Error fetching data:', error);// 处理错误，如显示错误信息
@@ -250,8 +287,11 @@ const getNum = () => {
 }
 const getAvatar = () => {
   try{
-    get('/api/auth/load-avatar',(data)=>{
-      avatar.value = data;
+    get({
+      url:'/api/auth/load-avatar',
+      success:(data)=>{
+        avatar.value = data;
+      }
     });
   }catch (error) {
     console.error('Error fetching data:', error);// 处理错误，如显示错误信息

@@ -132,7 +132,7 @@ const getStuData = async () => {
   tableData.value=data.rows
   pageTotal.value=data.total*/
   await async_post({
-    url: 'http://115.29.41.122:9662/api/teacher-system/students',
+    url: '/api/teacher-system/students',
     data: searchForm,
     success: (data) => {
       tableData.value=data.rows
@@ -167,14 +167,18 @@ const handleDelete = (index: number) => {
   })
       .then(() => {
         // 先从服务器删除数据
-        deletes(`/api/teacher-system/students/delete/${tableData.value[index].id}`,()=>{
-          // 服务器删除成功后，更新本地数组
-          ElMessage.success('删除成功');
-          tableData.value.splice(index, 1);
-        },()=>{
-          // 如果服务器删除失败，通知用户
-          ElMessage.error('删除失败');
-        })
+        deletes({
+          url: `/api/teacher-system/students/delete/${tableData.value[index].id}`,
+          success:()=>{
+            // 服务器删除成功后，更新本地数组
+            ElMessage.success('删除成功');
+            tableData.value.splice(index, 1);
+          },
+          failure:()=>{
+            // 如果服务器删除失败，通知用户
+            ElMessage.error('删除失败');
+          }
+        });
       })
       .catch(() => {
         // 用户取消操作
@@ -249,7 +253,7 @@ const updatePassword =async (password:string)=>{
   }*/
 
   await async_post({
-    url: `api/teacher-system/students/reset/${idy}`,
+    url: `/api/teacher-system/students/reset/${idy}`,
     data: password,
     success: () => {
       ElMessage.success("修改成功")

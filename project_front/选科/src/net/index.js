@@ -54,17 +54,17 @@ function storeAccessTokenAndRole(username,token,remember,role,expire,avatar){
 	}
 	/*sessionStorage.setItem("role",jRole)*/
 }
-function post(url, data, success, failure = defaultFailure) {
-	internalPost(url, data, accessHeader() , success, failure)
+function post({url, data, header = accessHeader(), success, failure = defaultFailure}) {
+	internalPost(url, data, header,  success, failure)
 }
-function put(url, data, success, failure=defaultFailure){
-	internalPut(url,data,accessHeader(),success,failure)
+function put({url, data, header = accessHeader(), success, failure = defaultFailure}){
+	internalPut(url,data,header,success,failure)
 }
-function get(url, success, failure = defaultFailure) {
-	internalGet(url, accessHeader(), success, failure)
+function get({url, success, header = accessHeader(), failure = defaultFailure}) {
+	internalGet(url, header, success, failure)
 }
-function deletes(url, success, failure = defaultFailure){
-	internalDelete(url, accessHeader(), success, failure)
+function deletes({url, success, header = accessHeader(), failure = defaultFailure}){
+	internalDelete(url, header, success, failure)
 }
 async function async_post({url, data, success, failure = defaultFailure, error = defaultError, header = accessHeader()}) {
 	try {
@@ -92,7 +92,7 @@ async function async_get({url, success, failure = defaultFailure, error = defaul
 			//return response.data.data;
 		} else {
 			//ElMessage.error(response.data.message)
-			failure(response.data.data, response.data.code, url);
+			failure(response.data.message, response.data.code, url);
 			//return null;
 		}
 
@@ -162,55 +162,4 @@ function logout(success, failure = defaultFailure){
 		//success()
 	}, failure)
 }
-function search(url,data,success,failure=defaultFailure){
-	post(url,data,(data)=>{
-		success(data)
-	},failure)
-}
-/*async function getMyData(url, respData) {
-	try {
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${takeAccessToken()}`
-			},
-			credentials: 'include',body: JSON.stringify(respData)
-		})
-		if (!response.ok) {
-			throw new Error('Failed to fetch table data');
-		}
-		const data = await response.json();
-		// 假设后台返回的数据格式是 { items: TableItem[] }
-		return data.data; // 更新tableData的值
-	} catch (error) {
-		console.error('Error getting data:', error.message);
-	}
-}*/
-/*function deleteData(url) {
-	return new Promise((resolve, reject) => {
-		deletes(url, (data) => {
-			resolve(data); // 成功时解析数据
-		}, (message) => {
-			reject(message); // 失败时拒绝错误消息
-		});
-	});
-}*/
-function editData(url,data,success,failure = defaultFailure) {
-	async_post(url, data, () => {
-		success()
-	}, failure)
-
-}
-function S_editData(url,myType,data,success,failure = defaultFailure,error=defaultError){
-	async_post(url, data, success, failure,error,{
-		'Content-Type': myType,
-		'Authorization': `Bearer ${takeAccessToken()}`
-	});
-}
-function getView(url,success,failure = defaultFailure){
-	return get(url,(data)=>{
-		success(data)
-	},failure)
-}
-export {login,unauthorized,get,post,logout,search,deletes,getView,put,takeAccessToken,async_get,async_post}
+export {login,unauthorized,get,post,logout,deletes,put,takeAccessToken,async_get,async_post}

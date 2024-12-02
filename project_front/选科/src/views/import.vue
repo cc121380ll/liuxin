@@ -103,7 +103,7 @@ import ResetPassword from "../components/reset-password.vue";
 import TableDetail from '../components/table-detail.vue';
 import {teacherSearchApi} from '../api/teacherSearch.js'
 import axios from 'axios';
-import {deletes,async_post, get} from "../net/index.js";
+import {deletes, async_post, get, takeAccessToken} from "../net/index.js";
 import resetPassword from "../components/reset-password.vue";
 
 interface TableItem {
@@ -229,10 +229,13 @@ const handleView = (row: TableItem) => {
     rowData.value = myData
     visible1.value = true;
   })*/
-  get(`api/school-system/teachers/view/${row.id}`, (data) => {
-    rowData.value = data;
-    visible1.value = true;
-  })
+  get({
+    url: `/api/school-system/teachers/view/${row.id}`,
+    success: (data) => {
+      rowData.value = data;
+      visible1.value = true;
+    }
+  });
 };
 const closeDialog1 = () => {
   visible1.value = false;
@@ -252,7 +255,11 @@ const updatePassword = (data)=>{
     data: data.password,
     success: () => {
       ElMessage.success("密码重置成功！");
-    }
+    },
+    header: {
+      'Content-Type': 'text/plain',
+      'Authorization': `Bearer ${takeAccessToken()}`
+    },
   })
   closeDialog2()
 }
