@@ -15,10 +15,6 @@ import {reactive, ref} from 'vue';
 
 
 const props = defineProps({
-  data: {
-    type: Object,
-    required: true
-  },
   edit:{
     type:Boolean,
     required:true
@@ -31,7 +27,7 @@ const props = defineProps({
 const defaultData = {
   password:''
 }
-const form = ref({ ...(props.edit ? props.data : defaultData) })
+const form = ref(defaultData)
 const resetPasswordRules: FormRules = {
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 };
@@ -49,12 +45,7 @@ const submitResetPassword = (formEl: FormInstance | undefined) => {
       ElMessage.error('密码重置失败');
       return;
     }
-
-// 这里应该有一个API调用来重置密码
-    console.log('提交的原密码:', form.value.password);
     props.update(form.value);
-// 实际的API调用逻辑应该在这里
-    ElMessage.success('密码重置成功！');
   });
 };
 </script>

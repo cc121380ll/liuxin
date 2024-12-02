@@ -90,12 +90,13 @@
 
 import {Delete, Search, CirclePlusFilled, UploadFilled, Document, Download, Upload} from '@element-plus/icons-vue';
 import { ref } from 'vue';
+import { BASE_URL } from '../main';
 import {ElMessage, UploadProps} from 'element-plus';
 import * as XLSX from 'xlsx';
-import {S_editData, get, getView} from "../net/index.js";
+import {takeAccessToken, async_post} from "../net/index.js";
 import Charts from "./charts.vue";
 
-const reqUrl = 'http://115.29.41.122:9662/api/school-system/upload'
+const reqUrl = BASE_URL + '/api/school-system/upload';
 const name = JSON.parse(sessionStorage.getItem("access_token")||localStorage.getItem("access_token")).username;
 const role = JSON.parse(sessionStorage.getItem("role"));
 const dragEnter = ref(false);
@@ -147,8 +148,17 @@ const uploadFiles = (files)=> {
   for (let i = 0; i < files.length; i++) {
     formData.append('file', files[i]);
   }
-  S_editData('/api/school-system/upload','multipart/form-data',formData,()=>{
-  })
+ /* S_editData('/api/school-system/upload','multipart/form-data',formData,()=>{
+  })*/
+  async_post({
+    url: '/api/school-system/upload',
+    data: formData,
+    success:()=>{ElMessage.success("上传成功");},
+    header: {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${takeAccessToken()}`
+    }
+  });
 }
 const beforeUpload: UploadProps['beforeUpload'] = async (rawFile) => {
     importList.value = await analysisExcel(rawFile);

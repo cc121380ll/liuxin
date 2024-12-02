@@ -3,18 +3,16 @@
 	<div>
 		<h3>学生管理</h3>
 		<div class="container">
-			<div class="search-box" style="display: flex; align-items: center;">
-        <el-form :model="query" ref="queryForm" style="flex-grow: 1; display: flex; align-items: center;">
-          <el-input v-model="query.name" placeholder="姓名" class="search-input mr10" clearable></el-input>
-          <el-input v-model="query.studentNumber" placeholder="学号" class="search-input mr10" clearable></el-input>
-          <el-input v-model="query._class" placeholder="班级" class="search-input mr10" clearable></el-input>
-          <el-select v-model="query.grade" placeholder="年级" class="search-input mr10" clearable>
-            <el-option value="一年级"/>
-            <el-option value="二年级"/>
-            <el-option value="三年级"/>
-          </el-select>
-          <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-        </el-form>
+			<div class="search-box">
+        <el-input v-model="query.name" placeholder="姓名" class="search-input mr10" clearable></el-input>
+        <el-input v-model="query.studentNumber" placeholder="学号" class="search-input mr10" clearable></el-input>
+        <el-input v-model="query._class" placeholder="班级" class="search-input mr10" clearable></el-input>
+        <el-select v-model="query.grade" placeholder="年级" class="search-input mr10" clearable>
+          <el-option value="一年级"/>
+          <el-option value="二年级"/>
+          <el-option value="三年级"/>
+        </el-select>
+        <el-button type="primary" :icon="Search" @click="getStuData">搜索</el-button>
         <el-button type="warning" :icon="CirclePlusFilled" @click="visible = true">新增</el-button>
         <el-button type="primary" class="button"  @click="exportXlsx">导出Excel</el-button>
       </div>
@@ -80,7 +78,7 @@
 		>
 			<StudentEdit :data="rowData" :edit="idEdit" :update="updateData" />
 		</el-dialog>
-		<el-dialog title="查看学生详情" v-model="visible1" width="700px" destroy-on-close>
+		<el-dialog title="查看学生详情" v-model="visible1" width="500px" destroy-on-close>
 			<TableDetail :data="rowData" />
 		</el-dialog>
 	</div>
@@ -88,7 +86,7 @@
 
 
 <script setup lang="ts" name="basetable">
-import { ref, reactive } from 'vue';
+import {ref, reactive, onMounted} from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Delete, Edit, Search, CirclePlusFilled, View } from '@element-plus/icons-vue';
 import { fetchData } from '../api/index';
@@ -96,7 +94,8 @@ import StudentEdit from '../components/student-edit.vue';
 import TableDetail from '../components/table-detail.vue';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
-import {deleteData, editData, getMyData, search, takeAccessToken} from "../net/index.js";
+import {async_post, deletes, takeAccessToken} from "../net/index.js";
+import {BASE_URL} from "../main";
 
 
 interface TableItem {
@@ -110,6 +109,7 @@ interface TableItem {
   classTeacherPhone:string;
   createdTime: string;
   updatedTime: string;
+  subject: string;
 }
 
 const query = reactive({
@@ -124,83 +124,35 @@ const queryForm = ref()
 const tableData = ref<TableItem[]>([]);
 const pageTotal = ref(0);
 
-// 获取表格数据
-//并将数据传入后端
-/*const getData = async () => {
-  try {
-    // 调用fetchData函数获取数据，并等待数据返回
-    const res = await fetchData();
-    // 从返回的数据中提取表格数据和页数总数
-    const tableData = res.data.list; // 表格数据
-    const pageTotal = res.data.pageTotal || 50; // 页数总数，默认值为50
-    // 将表格数据和页数总数发送到后端
-    await sendDataToBackend({ tableData, pageTotal });
-  } catch (error) {
-    // 捕获并处理可能的错误
-    console.error('Error getting data:', error);
-  }
-};
-// 异步函数，用于发送数据到后端
-const sendDataToBackend = async (data: { tableData: any; pageTotal: any; }) => {
-  try {
-    // 发起HTTP POST请求到后端API，并等待响应
-    const response = await fetch('https://localhost:8083/api/school-system/students/view/{id}', {
-      method: 'POST', // 请求方法为POST
-      headers: {
-        'Content-Type': 'application/json' // 指定请求体格式为JSON
-      },
-      body: JSON.stringify(data) // 将数据转换为JSON字符串并放在请求体中
-    });
-    // 检查响应是否成功
-    if (!response.ok) {
-      throw new Error('Failed to send data to backend'); // 如果不成功，则抛出错误
-    }
-    // 解析后端返回的JSON响应
-    const responseData = await response.json();
-    // 输出后端返回的数据到控制台
-    console.log('Response from backend:', responseData);
-  } catch (error) {
-    // 捕获并处理可能的错误
-    console.error('Error sending data to backend:', error);
-  }
-};
-// 调用getData函数，开始执行获取数据并发送到后端的流程
-getData();*/
 
-
-// 查询操作
-/*const handleSearch = () => {
-  const backendUrl = "https://localhost:8083/api/school-system/students/view/{id}";
-
-  // 使用 axios 发起 GET 请求
-  axios.get(backendUrl)
-    .then(response => {
-      // 处理响应数据
-      const searchResults = response.data;
-      console.log('Search results:', searchResults);
-      // 如果需要将数据保存到组件的数据中，可以通过回调函数来处理
-      // handleSearchSuccess(searchResults); // 示例中的处理函数
-    })
-    .catch(error => {
-      console.error('Search error:', error);
-    });
-};*/
+onMounted(() => {
+  getStuData();
+});
 
 const getStuData = async () => {
-  const data = await getMyData('http://115.29.41.122:9662/api/school-system/students', query)
+ /* const data = await getMyData('http://115.29.41.122:9662/api/school-system/students', query)
   tableData.value=data.rows
-  pageTotal.value=data.total
+  pageTotal.value=data.total*/
+  await async_post({
+    url: '/api/school-system/students',
+    data: query,
+    success: (data) => {
+      tableData.value=data.rows
+      pageTotal.value=data.total
+    }
+  })
 }
-getStuData();
 const exportXlsx = () =>{
-  window.open('http://115.29.41.122:9662/api/school-system/export?token='+takeAccessToken())
+  window.open(BASE_URL+'/api/school-system/export?token='+takeAccessToken())
 }
+/*
 const handleSearch = () => {
   search('/api/school-system/students',query,(data)=>{
     tableData.value=data.rows
     pageTotal.value=data.total
   })
 }
+*/
 
 // 调用 handleSearch 函数来执行搜索
 //handleSearch();
@@ -219,16 +171,14 @@ const handleDelete = (index: number) => {
 	})
       .then(() => {
         // 先从服务器删除数据
-        deleteData(`/api/school-system/students/delete/${tableData.value[index].id}`)
-            .then(() => {
-              // 服务器删除成功后，更新本地数组
-              ElMessage.success('删除成功');
-              tableData.value.splice(index, 1);
-            })
-            .catch(() => {
-              // 如果服务器删除失败，通知用户
-              ElMessage.error('删除失败');
-            });
+        deletes(`/api/school-system/school-subject/delete/${tableData.value[index].id}`,()=>{
+          // 服务器删除成功后，更新本地数组
+          ElMessage.success('删除成功');
+          tableData.value.splice(index, 1);
+        },()=>{
+          // 如果服务器删除失败，通知用户
+          ElMessage.error('删除失败');
+        })
       })
       .catch(() => {
         // 用户取消操作
@@ -247,36 +197,67 @@ const handleEdit = (index: number, row: TableItem) => {
 	visible.value = true;
 };
 const updateData = async (row: TableItem) => {
-
   /*idEdit.value ? (tableData.value[idx] = row) : tableData.value.unshift(row);
   console.log(tableData.value);*/
-if(idEdit.value) {
-  editData(`/api/school-system/students/edit/${row.id}`, {
-    name: row.name,
-    gender: row.gender,
-    studentNumber: row.studentNumber,
-    grade: row.grade,
-    _class: row._class,
-    classTeacher: row.classTeacher,
-    classTeacherPhone: row.classTeacherPhone
-  }, async () => {
-   //ElMessage.success("修改成功")
-    await getStuData()
-  })
-}else{
-  editData(`/api/school-system/students/add`, {
-    name: row.name,
-    gender: row.gender,
-    studentNumber: row.studentNumber,
-    grade: row.grade,
-    _class: row._class,
-    classTeacher: row.classTeacher,
-    classTeacherPhone: row.classTeacherPhone
-  }, async () => {
-    //ElMessage.success("修改成功")
-    await getStuData()
-  })
-}
+  if(idEdit.value) {
+    /*editData(`/api/school-system/students/edit/${row.id}`, {
+      name: row.name,
+      gender: row.gender,
+      studentNumber: row.studentNumber,
+      grade: row.grade,
+      _class: row._class,
+      classTeacher: row.classTeacher,
+      classTeacherPhone: row.classTeacherPhone
+    }, async () => {
+     //ElMessage.success("修改成功")
+      await getStuData()
+    })*/
+    await async_post({
+      url: `/api/school-system/students/edit/${row.id}`,
+      data: {
+        name: row.name,
+        gender: row.gender,
+        studentNumber: row.studentNumber,
+        grade: row.grade,
+        _class: row._class,
+        classTeacher: row.classTeacher,
+        classTeacherPhone: row.classTeacherPhone
+      },
+      success: () => {
+        ElMessage.success("修改成功！");
+        getStuData();
+      }
+    })
+  }else{
+    /* editData(`/api/school-system/students/add`, {
+       name: row.name,
+       gender: row.gender,
+       studentNumber: row.studentNumber,
+       grade: row.grade,
+       _class: row._class,
+       classTeacher: row.classTeacher,
+       classTeacherPhone: row.classTeacherPhone
+     }, async () => {
+       //ElMessage.success("修改成功")
+       await getStuData()
+     })*/
+    await async_post({
+      url: '/api/school-system/students/add',
+      data: {
+        name: row.name,
+        gender: row.gender,
+        studentNumber: row.studentNumber,
+        grade: row.grade,
+        _class: row._class,
+        classTeacher: row.classTeacher,
+        classTeacherPhone: row.classTeacherPhone
+      },
+      success: () => {
+        ElMessage.success("保存成功！")
+        getStuData()
+      }
+    })
+  }
   closeDialog();
 };
 

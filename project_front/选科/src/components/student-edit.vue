@@ -20,7 +20,7 @@
       </el-select>
 		</el-form-item>
 		<el-form-item label="行政班级" prop="_class">
-			<el-input v-model="form._class"></el-input>
+			<el-input v-model="form._class" placeholder="请按照“一班”类似格式输入"></el-input>
 		</el-form-item>
 		<el-form-item label="班主任" prop="classTeacher">
 			<el-input v-model="form.classTeacher"></el-input>
@@ -70,9 +70,45 @@ const defaultData = {
 const form = ref({ ...(props.edit ? props.data : defaultData) });
 
 const rules: FormRules = {
-	name: [{ required: true, message: '姓名', trigger: 'blur' }],
-	studentNumber: [{ required: true, message: '学号', trigger: 'blur' }],
-	gender: [{ required:false, message: '性别', trigger: 'blur' }],
+	name: [
+    { required: true, message: '请输入姓名', trigger: 'blur' },
+    {
+      pattern: /^(?:[\u4e00-\u9fa5·]{2,16})$/,
+      message:'请输入正确的姓名',
+      trigger:'blur'
+    }
+  ],
+	studentNumber: [{ required: true, message: '请输入学号', trigger: 'blur' }],
+	gender: [{ required: true, message: '请选择性别', trigger: 'blur' }],
+  grade: [{required: true, message: '请选择年级', trigger: 'blur' }],
+  _class: [
+    {required: true, message: '请输入班级', trigger: 'blur' },
+    {
+      pattern: /^.*?班$/,
+      message:'请输入正确的班级',
+      trigger:'blur'
+    }
+  ],
+  classTeacher: [
+    { required: true, message: '请输入班主任名', trigger: 'blur' },
+    {
+      pattern: /^(?:[\u4e00-\u9fa5·]{2,16})$/,
+      message:'请输入正确的姓名',
+      trigger:'blur'
+    }
+  ],
+  classTeacherPhone: [
+    {
+      required: true,
+      message: '请输入班主任手机号',
+      trigger: 'blur',
+    },
+    {
+      pattern:/^(?:(?:\+|00)86)?1[3-9]\d{9}$/,
+      message:'请输入正确的手机号',
+      trigger:'blur'
+    }
+  ]
 };
 const formRef = ref<FormInstance>();
 const saveEdit = (formEl: FormInstance | undefined) => {
@@ -80,7 +116,7 @@ const saveEdit = (formEl: FormInstance | undefined) => {
 	formEl.validate(valid => {
 		if (!valid) return false;
 		props.update(form.value);
-		ElMessage.success('保存成功！');
+		//ElMessage.success('保存成功！');
 	});
 };
 

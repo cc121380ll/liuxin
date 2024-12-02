@@ -70,8 +70,8 @@ const checked = ref(lgStr ? true : false);
 
 const router = useRouter();
 const param = reactive<LoginInfo>({
-    phone: defParam ? defParam.phone : '',
-    password: defParam ? defParam.password : '',
+  phone: defParam ? defParam.phone : '',
+  password: defParam ? defParam.password : '',
 	code:defParam?defParam.code:'',
 	confirm:defParam?defParam.confirm:'',
 });

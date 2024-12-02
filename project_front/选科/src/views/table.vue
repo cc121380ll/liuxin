@@ -4,20 +4,15 @@
     <h3>学生管理</h3>
 		<div class="container">
 			<div class="search-box">
-        <el-form :model="searchForm" ref="searchFormRef">
-          <el-input v-model="searchForm.name" placeholder="姓名" class="search-input mr10" clearable></el-input>
-          <el-input v-model="searchForm.studentNumber" placeholder="学号" class="search-input mr10" clearable></el-input>
-          <el-select v-model="searchForm.status" placeholder="选择" class="search-input mr10">
-            <el-option label="启用" value=1></el-option>
-            <el-option label="停用" value=0></el-option>
-          </el-select>
-          <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-        </el-form>
-
-<!--				<el-button type="warning" :icon="CirclePlusFilled" @click="visible = true">新增</el-button>-->
+        <el-input v-model="searchForm.name" placeholder="姓名" class="search-input mr10" clearable></el-input>
+        <el-input v-model="searchForm.studentNumber" placeholder="学号" class="search-input mr10" clearable></el-input>
+        <el-select v-model="searchForm.status" placeholder="选择" class="search-input mr10">
+          <el-option label="启用" value=1></el-option>
+          <el-option label="停用" value=0></el-option>
+        </el-select>
+        <el-button type="primary" :icon="Search" @click="getStuData">搜索</el-button>
 			</div>
 			<el-table :data="tableData" border class="table" ref="multipleTable" header-cell-class-name="table-header">
-<!--				<el-table-column prop="id" label="ID" width="55" align="center"></el-table-column>-->
         <el-table-column label="序号" align="center">
           <template #default="scope">
             {{ (scope.$index+1)+(searchForm.pageNum-1)*searchForm.pageSize }}
@@ -93,7 +88,7 @@
 </template>
 
 <script setup lang="ts" name="basetable">
-import { ref, reactive } from 'vue';
+import {ref, reactive, onMounted} from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {Delete, Edit, Search, CirclePlusFilled, Setting} from '@element-plus/icons-vue';
 import { fetchData } from '../api/index';
@@ -102,7 +97,7 @@ import TableDetail from '../components/table-detail.vue';
 import ResetPassword from "../components/reset-password.vue";
 import request from '../utils/request';
 import axios from 'axios';
-import { search,getMyData,deleteData,editData,S_editData} from "../net/index.js";
+import {async_post, deletes} from "../net/index.js";
 import router from "../router";
 
 interface TableItem {
@@ -129,78 +124,28 @@ const searchForm = reactive({
 })
 
 
-// 获取表格数据
-/*const sendDataToBackend = async (data: { tableData: any; pageTotal: any; }) => {
-  try {
-    const response = await fetch('/api/teacher-system/students', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to send data to backend');
-    }
-
-    const responseData = await response.json();
-    console.log('Response from backend:', responseData);
-    // 可以根据后端返回的数据进行相应的处理
-
-  } catch (error) {
-    console.error('Error sending data to backend:', error.message);
-  }
-};
-
-const getDataAndSendToBackend = async () => {
-  try {
-    const res = await fetchData();
-    const tableData = res.data.list;
-    const pageTotal = res.data.pageTotal || 50;
-    // 将数据组装成需要发送给后端的格式
-    const dataToSend = {
-      tableData: tableData,
-      pageTotal: pageTotal
-    };
-    // 发送数据到后端
-    await sendDataToBackend(dataToSend);
-  } catch (error) {
-    console.error('Error getting data:', error.message);
-  }
-};
-
-getDataAndSendToBackend();*/
-
-// 查询操作
-/*const handleSearch = () => {
-  const backendUrl = "/api/teacher-system/students";
-
-  // 使用 axios 发起 GET 请求
-  axios.get(backendUrl)
-    .then(response => {
-      // 处理响应数据
-      const searchResults = response.data;
-      console.log('Search results:', searchResults);
-      // 如果需要将数据保存到组件的数据中，可以通过回调函数来处理
-      // handleSearchSuccess(searchResults); // 示例中的处理函数
-    })
-    .catch(error => {
-      console.error('Search error:', error);
-    });
-};*/
+onMounted(()=>{
+  getStuData();
+})
 const getStuData = async () => {
-  const data = await getMyData('http://115.29.41.122:9662/api/teacher-system/students', searchForm)
+/*  const data = await getMyData('http://115.29.41.122:9662/api/teacher-system/students', searchForm)
   tableData.value=data.rows
-  pageTotal.value=data.total
+  pageTotal.value=data.total*/
+  await async_post({
+    url: 'http://115.29.41.122:9662/api/teacher-system/students',
+    data: searchForm,
+    success: (data) => {
+      tableData.value=data.rows
+      pageTotal.value=data.total
+    }
+  })
 }
-getStuData();
-const handleSearch = () => {
+/*const handleSearch = () => {
     search('/api/teacher-system/students',searchForm,(data)=>{
       tableData.value=data.rows
       pageTotal.value=data.total
     })
-}
+}*/
 // 调用 handleSearch 函数来执行搜索
 //handleSearch();
 
@@ -222,16 +167,14 @@ const handleDelete = (index: number) => {
   })
       .then(() => {
         // 先从服务器删除数据
-        deleteData(`/api/teacher-system/students/delete/${tableData.value[index].id}`)
-            .then(() => {
-              // 服务器删除成功后，更新本地数组
-              ElMessage.success('删除成功');
-              tableData.value.splice(index, 1);
-            })
-            .catch(() => {
-              // 如果服务器删除失败，通知用户
-              ElMessage.error('删除失败');
-            });
+        deletes(`/api/teacher-system/students/delete/${tableData.value[index].id}`,()=>{
+          // 服务器删除成功后，更新本地数组
+          ElMessage.success('删除成功');
+          tableData.value.splice(index, 1);
+        },()=>{
+          // 如果服务器删除失败，通知用户
+          ElMessage.error('删除失败');
+        })
       })
       .catch(() => {
         // 用户取消操作
@@ -255,7 +198,7 @@ const handleEdit = (index: number, row: TableItem) => {
 	visible.value = true;
 };
 const updateData =async(row: TableItem) => {
-  editData(`/api/teacher-system/students/edit/${row.id}`,{
+ /* editData(`/api/teacher-system/students/edit/${row.id}`,{
     name:row.name,
     gender:row.gender,
     studentNumber:row.studentNumber,
@@ -265,8 +208,22 @@ const updateData =async(row: TableItem) => {
   },async ()=>{
    // ElMessage.success("修改成功")
     await getStuData()
+  })*/
+  await async_post({
+    url: `/api/teacher-system/students/edit/${row.id}`,
+    data: {
+      name:row.name,
+      gender:row.gender,
+      studentNumber:row.studentNumber,
+      grade:row.grade,
+      _class:row._class,
+      status:row.status
+    },
+    success: (data) => {
+      ElMessage.success("修改成功")
+      getStuData()
+    }
   })
-
     /*idEdit.value ? (tableData.value[idx] = row) : tableData.value.unshift(row);
     console.log(tableData.value);*/
 
@@ -279,17 +236,29 @@ const handleRestPassword = (index:number) =>{
   visible1.value = true
 }
 const updatePassword =async (password:string)=>{
-  S_editData(`api/teacher-system/students/reset/${idy}`,'multipart/form-data',password,async ()=>{
+ /* S_editData(`api/teacher-system/students/reset/${idy}`,'multipart/form-data',password,async ()=>{
     //ElMessage.success("修改成功")
     const s = tableData.value.findIndex(student => student.id === idy);
     if (s!=-1) {
       tableData[s].value.password = password;
     }
-  })
+  })*/
  /* const s = tableData.value.findIndex(student => student.id === idy);
   if (s!=-1) {
     tableData[s].value.password = password; // 更新密码
   }*/
+
+  await async_post({
+    url: `api/teacher-system/students/reset/${idy}`,
+    data: password,
+    success: () => {
+      ElMessage.success("修改成功")
+      const s = tableData.value.findIndex(student => student.id === idy);
+      if (s!=-1) {
+        tableData[s].value.password = password;
+      }
+    }
+  })
   closeDialog1()
 }
 const closeDialog = () => {

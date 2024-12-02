@@ -162,67 +162,68 @@ const option2 = {
 
  //发起GET请求获取各科的选科情况的数据
  const getSubjectSingleClass = async () => {
-   try {
-     const data = await async_get('/api/teacher-system/subject-single');
-     const keyMapping = {
-       physics: '物理',
-       history: '历史',
-       chemistry: '化学',
-       creature: '生物',
-       geography: '地理',
-       politics: '政治'
-     };
-     const keys = Object.keys(data).map(key => keyMapping[key]);
-     console.log(keys)
-     const values = Object.values(data).map(value => value === null ? 0 : value);
-     chart1.hideLoading(); // 数据加载完毕，隐藏加载动画
-     //根据后端数据更新图表chart1选项中的数据
-     chart1.setOption({
-       title: {
-         text: '科目统计'
-       },
-       tooltip: {
-         trigger: 'axis'
-       },
-       xAxis: {
-         type: 'category',
-         data: keys
-       },
-       yAxis: {
-         type: 'value'
-       },
-       series: [{
-         name: '数量',
-         type: 'bar',
-         data: values
-       }]
-     });
-   } catch (error) {
-     console.error('Error fetching data:', error);// 处理错误，如显示错误信息
-   }
+   await async_get({
+     url: '/api/teacher-system/subject-single',
+     success: (data) => {
+       const keyMapping = {
+         physics: '物理',
+         history: '历史',
+         chemistry: '化学',
+         creature: '生物',
+         geography: '地理',
+         politics: '政治'
+       };
+       if(!data) return;
+       const keys = Object.keys(data).map(key => keyMapping[key]);
+       console.log(keys)
+       const values = Object.values(data).map(value => value === null ? 0 : value);
+       chart1.hideLoading(); // 数据加载完毕，隐藏加载动画
+       //根据后端数据更新图表chart1选项中的数据
+       chart1.setOption({
+         title: {
+           text: '科目统计'
+         },
+         tooltip: {
+           trigger: 'axis'
+         },
+         xAxis: {
+           type: 'category',
+           data: keys
+         },
+         yAxis: {
+           type: 'value'
+         },
+         series: [{
+           name: '数量',
+           type: 'bar',
+           data: values
+         }]
+       });
+     }
+   });
  };
   await getSubjectSingleClass();
  // 发起GET请求获取选科组合的情况的数据
  const getSubjectCombinationClass = async () => {
-   try {
-     const data = await async_get('/api/teacher-system/subject-all'); // 替换为你的数据URL
-     const dealData = data.map(i=>({
-       name: i.name,
-       value: i.count
-     }));
-     chart2.hideLoading(); // 数据加载完毕，隐藏加载动画
-     //根据后端数据更新图表chart2选项中的数据
-     chart2.setOption({
-       series: [{
-         data: dealData // 假设返回的数据结构中包含product字段
-       }]
-     });
-     //后台获取数据动态更新CombinationTable2表格的数据
-     combinationData.value = data;
-   } catch (error) {
-     console.error('Error fetching data:', error);// 处理错误，如显示错误信息
-   }
- };
+   await async_get({
+     url: '/api/teacher-system/subject-all',
+     success: (data) => {
+       const dealData = data.map(i => ({
+         name: i.name,
+         value: i.count
+       }));
+       chart2.hideLoading(); // 数据加载完毕，隐藏加载动画
+       //根据后端数据更新图表chart2选项中的数据
+       chart2.setOption({
+         series: [{
+           data: dealData // 假设返回的数据结构中包含product字段
+         }]
+       });
+       //后台获取数据动态更新CombinationTable2表格的数据
+       combinationData.value = data;
+     } // 替换为你的数据URL
+   });
+ }
  await getSubjectCombinationClass();
 
 });

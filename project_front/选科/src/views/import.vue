@@ -8,7 +8,7 @@
 				<el-input v-model="query.phone" placeholder="手机号" class="search-input mr10" clearable></el-input>
 				<el-input v-model="query.grade" placeholder="年级" class="search-input mr10" clearable></el-input>
 				<el-input v-model="query._class" placeholder="班级" class="search-input mr10" clearable></el-input>
-				<el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
+				<el-button type="primary" :icon="Search" @click="getStuData">搜索</el-button>
 				<el-button type="warning" :icon="CirclePlusFilled" @click="visible = true">新增</el-button>
 			</div>
 			<el-table :data="tableData" border class="table" ref="multipleTable" header-cell-class-name="table-header">
@@ -19,8 +19,18 @@
         </el-table-column>
 				<el-table-column prop="name" label="姓名" align="center"></el-table-column>
 				<el-table-column prop="phone" label="手机号" align="center"></el-table-column>
-				<el-table-column prop="grade" label="年级" align="center"></el-table-column>
-				<el-table-column prop="_class" label="行政班级" align="center"></el-table-column>
+				<el-table-column prop="grade" label="年级" align="center">
+          <template #default="scope">
+            <span v-if="scope.row.grade">{{ scope.row.grade }}</span>
+            <span v-else style="color:#909399">（未分配班级）</span>
+          </template>
+        </el-table-column>
+				<el-table-column prop="_class" label="行政班级" align="center">
+          <template #default="scope">
+            <span v-if="scope.row._class">{{ scope.row._class }}</span>
+            <span v-else style="color:#909399">（未分配班级）</span>
+          </template>
+        </el-table-column>
 				<el-table-column prop="createdTime" label="创建时间" align="center"></el-table-column>
 				<el-table-column prop="updatedTime" label="修改时间" align="center"></el-table-column>
 				<el-table-column label="操作" width="280" align="center">
@@ -71,17 +81,19 @@
       width="500px"
       destroy-on-close
       :close-on-click-modal="false"
-      @close="closeDialog1">
+      @close="closeDialog1"
+      title="查看老师详情"
+    >
       <TeacherDetail :data="rowData"/>
     </el-dialog>
 		<el-dialog title="重置密码" v-model="visible2" width="500px"  @close="closeDialog2" destroy-on-close>
-      <ResetPassword :update="updatePassword" :edit="true" :data="''"/>
+      <ResetPassword :update="updatePassword" :edit="true"/>
 		</el-dialog>
 	</div>
 </template>
 
 <script setup lang="ts" name="basetable">
-import { ref, reactive } from 'vue';
+import {ref, reactive, onMounted} from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Delete, Edit, Search, CirclePlusFilled ,Setting,View} from '@element-plus/icons-vue';
 import { fetchData } from '../api/index';
@@ -91,7 +103,7 @@ import ResetPassword from "../components/reset-password.vue";
 import TableDetail from '../components/table-detail.vue';
 import {teacherSearchApi} from '../api/teacherSearch.js'
 import axios from 'axios';
-import {deleteData, getMyData, search, getView, S_editData,editData} from "../net/index.js";
+import {deletes,async_post, get} from "../net/index.js";
 import resetPassword from "../components/reset-password.vue";
 
 interface TableItem {
@@ -115,82 +127,30 @@ const query = reactive({
 const tableData = ref<TableItem[]>([]);
 const pageTotal = ref(0);
 
-// 获取表格数据
-/*
-const sendDataToBackend = async (data: { tableData: any;pageTotal: any; }) => {
-	try{
-		const response = await fetch('/api/school-system/teachers',{
-			method:'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body:JSON.stringify(data)
-		});
-		
-		if(!response.ok) {
-			throw new Error('Failed to send data to backend');
-		}
-		
-		const responseData = await response.json();
-		console.log('Response from backend:',responseData);
-		//可以根据后端返回的数据进行相应的处理
-	}catch(error){
-		console.error('Error sending data to backend',error.message);
-	}
-};
 
-const getDataAndSendToBackend = async () => {
-	try{
-		const res =await fetchData();
-		const tableData = res.data.list;
-		const pageTotal = res.data.pageTotal || 50;
-		//将数据组装成需要发送给后端的格式
-		const dataToSend = {
-			tableData : tableData,
-			pageTotal: pageTotal
-		};
-		//发送数据到后端
-		await sendDataToBackend(dataToSend)
-	}catch(error){
-		console.error('Error getting data',error.message);
-	}
-};
-
-getDataAndSendToBackend();
-*/
-
-// 查询操作
-/*
-const handleSearch = () => {
-  const backendUrl = "https://localhost:8083/api/school-system/teachers/view/{id}";
-
-  // 使用 axios 发起 GET 请求
-  axios.get(backendUrl)
-    .then(response => {
-      // 处理响应数据
-      const searchResults = response.data;
-      console.log('Search results:', searchResults);
-      // 如果需要将数据保存到组件的数据中，可以通过回调函数来处理
-      // handleSearchSuccess(searchResults); // 示例中的处理函数
-    })
-    .catch(error => {
-      console.error('Search error:', error);
-    });
-};
-*/
-
+onMounted(() => {
+  getStuData();
+})
 const getStuData = async () => {
-  const data = await getMyData('http://115.29.41.122:9662/api/school-system/teachers', query)
+ /* const data = await getMyData('http://115.29.41.122:9662/api/school-system/teachers', query)
   tableData.value=data.rows
-  pageTotal.value=data.total
+  pageTotal.value=data.total*/
+  await async_post({
+    url: '/api/school-system/teachers',
+    data: query,
+    success: (data) => {
+      tableData.value=data.rows
+      pageTotal.value=data.total
+    }
+  })
 }
-getStuData();
-const handleSearch = () => {
+
+/*const handleSearch = () => {
   search('/api/school-system/teachers',query,(data)=>{
     tableData.value=data.rows
     pageTotal.value=data.total
   })
-}
+}*/
 // 调用 handleSearch 函数来执行搜索
 //handleSearch();
 
@@ -233,20 +193,24 @@ let idx: number = -1;
 let idy: bigint = -1n;
 const idEdit = ref(false);
 const rowData = ref({});
-
-const handleEdit = (index: number, row: TableItem) => {
-	idx = index;
-	rowData.value = row;
-	idEdit.value = true;
-	visible.value = true;
-};
 const updateData = async (row: TableItem) => {
-  editData('/api/school-system/teachers/add',{
+ /* editData('/api/school-system/teachers/add',{
     name:row.name,
     phone:row.phone
   },async()=>{
     //ElMessage.success("添加成功")
     await getStuData()
+  })*/
+  await async_post({
+    url: '/api/school-system/teachers/add',
+    data: {
+      name:row.name,
+      phone:row.phone
+    },
+    success: () => {
+      ElMessage.success("添加成功")
+      getStuData()
+    }
   })
 	/*idEdit.value ? (tableData.value[idx] = row) : tableData.value.unshift(row);
 	console.log(tableData.value);*/
@@ -261,11 +225,14 @@ const closeDialog = () => {
 const visible1 = ref(false);
 
 const handleView = (row: TableItem) => {
-  getView(`api/school-system/teachers/view/${row.id}`,(myData)=>{
+  /*getView(`api/school-system/teachers/view/${row.id}`,(myData)=>{
     rowData.value = myData
     visible1.value = true;
+  })*/
+  get(`api/school-system/teachers/view/${row.id}`, (data) => {
+    rowData.value = data;
+    visible1.value = true;
   })
-
 };
 const closeDialog1 = () => {
   visible1.value = false;
@@ -276,9 +243,16 @@ const handleResetPassword = (index:number) => {
   idy = tableData.value[index].id
   visible2.value = true
 }
-const updatePassword = (password:string)=>{
-  S_editData(`api/school-system/teachers/reset-password/${idy}`,'multipart/form-data',password,()=>{
+const updatePassword = (data)=>{
+ /* S_editData(`api/school-system/teachers/reset-password/${idy}`,'multipart/form-data',password,()=>{
     //ElMessage.success("修改成功")
+  })*/
+  async_post({
+    url: `api/school-system/teachers/reset-password/${idy}`,
+    data: data.password,
+    success: () => {
+      ElMessage.success("密码重置成功！");
+    }
   })
   closeDialog2()
 }

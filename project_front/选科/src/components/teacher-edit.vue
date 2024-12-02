@@ -5,17 +5,7 @@
 		</el-form-item>
 		<el-form-item label="手机号" prop="phone">
 			<el-input v-model="form.phone"></el-input>
-		</el-form-item><!--
-		<el-form-item label="年级" prop="grade">
-			 <el-select v-model="form.grade">
-         <el-option value="一年级"/>
-         <el-option value="二年级"/>
-         <el-option value="三年级"/>
-       </el-select>
 		</el-form-item>
-		<el-form-item label="行政班级" prop="class">
-			<el-input v-model="form._class"></el-input>
-		</el-form-item>-->
 		<el-form-item>
 			<el-button type="primary" @click="saveEdit(formRef)">保 存</el-button>
 		</el-form-item>
@@ -53,8 +43,26 @@ const defaultData = {
 const form = ref({ ...(props.edit ? props.data : defaultData) });
 
 const rules: FormRules = {
-	name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-	phone: [{ required: true, message: '请输入手机号', trigger: 'blur' }],
+  name: [
+    { required: true, message: '请输入姓名', trigger: 'blur' },
+    {
+      pattern: /^(?:[\u4e00-\u9fa5·]{2,16})$/,
+      message:'请输入正确的姓名',
+      trigger:'blur'
+    }
+  ],
+  phone: [
+    {
+      required: true,
+      message: '请输入手机号',
+      trigger: 'blur',
+    },
+    {
+      pattern:/^(?:(?:\+|00)86)?1[3-9]\d{9}$/,
+      message:'请输入正确的手机号',
+      trigger:'blur'
+    }
+  ]
 };
 const formRef = ref<FormInstance>();
 const saveEdit = (formEl: FormInstance | undefined) => {

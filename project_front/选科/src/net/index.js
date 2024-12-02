@@ -57,53 +57,43 @@ function storeAccessTokenAndRole(username,token,remember,role,expire,avatar){
 function post(url, data, success, failure = defaultFailure) {
 	internalPost(url, data, accessHeader() , success, failure)
 }
-function put(url,data,success,failure=defaultFailure){
+function put(url, data, success, failure=defaultFailure){
 	internalPut(url,data,accessHeader(),success,failure)
 }
-function get(url,success, failure = defaultFailure) {
+function get(url, success, failure = defaultFailure) {
 	internalGet(url, accessHeader(), success, failure)
 }
-function deletes(url, success , failure = defaultFailure){
+function deletes(url, success, failure = defaultFailure){
 	internalDelete(url, accessHeader(), success, failure)
 }
-function async_post(url, data, header, success, failure = defaultFailure) {
-	async_internalPost(url, data, accessHeader(), defaultError, failure)
-		.then(success)
-		.catch(err=>{
-			failure(err)
-		});
-}
-async function async_internalPost(url, data, header, success, error = defaultError, failure) {
+async function async_post({url, data, success, failure = defaultFailure, error = defaultError, header = accessHeader()}) {
 	try {
 		const response = await axios.post(url, data, { headers: header });
 		if (response.data.code === 200) {
-			ElMessage.success("操作成功")
-			return response.data.data;
+			//ElMessage.success("操作成功")
+			success(response.data.data);
+			//return response.data.data;
 		} else {
-			ElMessage.error(response.data.message)
-			return null;
+			//ElMessage.error(response.data.message)
+			failure(response.data.message, response.data.code, url)
+			//return null;
 		}
 
 	} catch (err) {
 		error(err); // 这里可以直接抛出错误，或者创建一个自定义错误对象
 	}
 }
-/*function async_get(url, header, success, failure = defaultFailure){
-	async_internalGet(url, accessHeader(), defaultError, failure)
-		.then(success)
-		.catch(err=>{
-			failure(err)
-		});
-}*/
-async function async_get(url, header = accessHeader(), error = defaultError) {
+async function async_get({url, success, failure = defaultFailure, error = defaultError, header = accessHeader()}) {
 	try {
 		const response = await axios.get(url, { headers: header });
 		if (response.data.code === 200) {
 			//ElMessage.success("操作成功")
-			return response.data.data;
+			success(response.data.data);
+			//return response.data.data;
 		} else {
-			ElMessage.error(response.data.message)
-			return null;
+			//ElMessage.error(response.data.message)
+			failure(response.data.data, response.data.code, url);
+			//return null;
 		}
 
 	} catch (err) {
@@ -148,7 +138,6 @@ function internalPut(url,data,header,success,failure,error = defaultError){
 	})
 }
 
-
 function login(username,password,remember,success,failure=defaultFailure){
 	internalPost('/api/auth/login',{   //url写什么？
 		username:username,
@@ -178,7 +167,7 @@ function search(url,data,success,failure=defaultFailure){
 		success(data)
 	},failure)
 }
-async function getMyData(url, respData) {
+/*async function getMyData(url, respData) {
 	try {
 		const response = await fetch(url, {
 			method: 'POST',
@@ -197,8 +186,8 @@ async function getMyData(url, respData) {
 	} catch (error) {
 		console.error('Error getting data:', error.message);
 	}
-}
-function deleteData(url) {
+}*/
+/*function deleteData(url) {
 	return new Promise((resolve, reject) => {
 		deletes(url, (data) => {
 			resolve(data); // 成功时解析数据
@@ -206,42 +195,22 @@ function deleteData(url) {
 			reject(message); // 失败时拒绝错误消息
 		});
 	});
-}
+}*/
 function editData(url,data,success,failure = defaultFailure) {
 	async_post(url, data, () => {
 		success()
 	}, failure)
 
 }
-function S_editData(url,myType,data,success,failure = defaultFailure){
-	async_internalPost(url, data, {
+function S_editData(url,myType,data,success,failure = defaultFailure,error=defaultError){
+	async_post(url, data, success, failure,error,{
 		'Content-Type': myType,
 		'Authorization': `Bearer ${takeAccessToken()}`
-	}, () => {
-		success()
-	}, failure)
-		.then(success)
-		.catch(err=>{
-			failure(err)
-		})
-}
-
-function exportXlsx(url,success,failure=defaultFailure){
-	get(url,()=>{
-		success()
-	},failure)
-}
-function getWithType(url,myType,success,failure=defaultFailure){
-	internalGet(url,{
-		'Content-Type': myType,
-		'Authorization': `Bearer ${takeAccessToken()}`
-	},()=>{
-		success()
-	},failure)
+	});
 }
 function getView(url,success,failure = defaultFailure){
 	return get(url,(data)=>{
 		success(data)
 	},failure)
 }
-export {login,unauthorized,get,post,logout,search,getMyData,deleteData,editData,S_editData,getView,put,getWithType,takeAccessToken,async_get}
+export {login,unauthorized,get,post,logout,search,deletes,getView,put,takeAccessToken,async_get,async_post}

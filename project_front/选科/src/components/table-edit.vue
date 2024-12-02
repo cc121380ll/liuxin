@@ -71,9 +71,25 @@ const defaultData = {
 const form = ref({ ...(props.edit ? props.data : defaultData) });
 
 const rules: FormRules = {
-	name: [{ required: true, message: '姓名', trigger: 'blur' }],
-	studentNumber: [{ required: true, message: '学号', trigger: 'blur' }],
-	gender: [{ required:false, message: '性别', trigger: 'blur' }],
+  name: [
+    { required: true, message: '请输入姓名', trigger: 'blur' },
+    {
+      pattern: /^(?:[\u4e00-\u9fa5·]{2,16})$/,
+      message:'请输入正确的姓名',
+      trigger:'blur'
+    }
+  ],
+  studentNumber: [{ required: true, message: '请输入学号', trigger: 'blur' }],
+  gender: [{ required: true, message: '请选择性别', trigger: 'blur' }],
+  grade: [{required: true, message: '请选择年级', trigger: 'blur' }],
+  _class: [
+    {required: true, message: '请输入班级', trigger: 'blur' },
+    {
+      pattern: /^.*?班$/,
+      message:'请输入正确的班级',
+      trigger:'blur'
+    }
+  ]
 };
 const formRef = ref<FormInstance>();
 

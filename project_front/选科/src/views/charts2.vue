@@ -267,130 +267,132 @@ onMounted(async () => {
 
  //发起GET请求获取学校的已选和未选科的人数的数据
  const getSubjectStatus = async () => {
-   try {
-     const data = await async_get('/api/school-system/subject-status');
-     selected.value = data[0].count;
-     notSelected.value = data[1].count;
-     chart3.hideLoading(); // 数据加载完毕，隐藏加载动画
-     //根据后端数据更新图表chart3选项中的数据
-     chart3.setOption({
-       series: [
-         {
-           name: 'Access From',
-           type: 'pie',
-           radius: '80%',
-           data: [
-             { value: data[0].count, name: data[0].status == 1 ? '已选':'未选'},
-             { value: data[1].count, name: data[1].status == 1 ? '已选':'未选'},
-           ],
-           emphasis: {
-             itemStyle: {
-               shadowBlur: 10,
-               shadowOffsetX: 0,
-               shadowColor: 'rgba(0, 0, 0, 0.5)'
+   await async_get({
+     url: '/api/school-system/subject-status',
+     success: (data)=>{
+       if(!data.length) return;
+       else if(data.length == 1){
+         if (data[0].status == 0) notSelected.value = data[0].count;
+         else selected.value = data[0].count;
+       } else{
+         selected.value = data[0].count;
+         notSelected.value = data[1].count;
+         chart3.hideLoading(); // 数据加载完毕，隐藏加载动画
+         //根据后端数据更新图表chart3选项中的数据
+         chart3.setOption({
+           series: [
+             {
+               name: 'Access From',
+               type: 'pie',
+               radius: '80%',
+               data: [
+                 { value: data[0].count, name: data[0].status == 1 ? '已选':'未选'},
+                 { value: data[1].count, name: data[1].status == 1 ? '已选':'未选'},
+               ],
+               emphasis: {
+                 itemStyle: {
+                   shadowBlur: 10,
+                   shadowOffsetX: 0,
+                   shadowColor: 'rgba(0, 0, 0, 0.5)'
+                 }
+               }
              }
-           }
-         }
-       ]
-     });
-   } catch (error) {
-     console.error('Error fetching data:', error);
-     // 处理错误，如显示错误信息
-   }
+           ]
+         });
+       }
+     }
+   });
  };
  await getSubjectStatus();
 
  //发起GET请求获取各科的选科情况的数据
  const getSubjectSingleClass = async () => {
-   try {
-     const data = await async_get('/api/school-system/subject-single');
-     const keyMapping = {
-       physics: '物理',
-       history: '历史',
-       chemistry: '化学',
-       creature: '生物',
-       geography: '地理',
-       politics: '政治'
-     };
-     const keys = Object.keys(data).map(key => keyMapping[key]);
-     console.log(keys)
-     const values = Object.values(data).map(value => value === null ? 0 : value);
-     chart1.hideLoading(); // 数据加载完毕，隐藏加载动画
-     //根据后端数据更新图表chart1选项中的数据
-     chart1.setOption({
-       title: {
-         text: '科目统计'
-       },
-       tooltip: {
-         trigger: 'axis'
-       },
-       xAxis: {
-         type: 'category',
-         data: keys
-       },
-       yAxis: {
-         type: 'value'
-       },
-       series: [{
-         name: '数量',
-         type: 'bar',
-         data: values
-       }]
-     });
-   } catch (error) {
-     console.error('Error fetching data:', error);// 处理错误，如显示错误信息
-   }
+   await async_get({
+     url: '/api/school-system/subject-single',
+     success: (data)=>{
+       const keyMapping = {
+         physics: '物理',
+         history: '历史',
+         chemistry: '化学',
+         creature: '生物',
+         geography: '地理',
+         politics: '政治'
+       };
+       if(!data) return;
+       const keys = Object.keys(data).map(key => keyMapping[key]);
+       const values = Object.values(data).map(value => value === null ? 0 : value);
+       chart1.hideLoading(); // 数据加载完毕，隐藏加载动画
+       //根据后端数据更新图表chart1选项中的数据
+       chart1.setOption({
+         title: {
+           text: '科目统计'
+         },
+         tooltip: {
+           trigger: 'axis'
+         },
+         xAxis: {
+           type: 'category',
+           data: keys
+         },
+         yAxis: {
+           type: 'value'
+         },
+         series: [{
+           name: '数量',
+           type: 'bar',
+           data: values
+         }]
+       });
+     }
+   });
  };
  await getSubjectSingleClass();
 
  //获取表格数据
  const getSingleClassTable = async ()=>{
-   try {
-     const data = await async_get('/api/school-system/subject-single-class'); // 替换为你的数据URL
-     console.log(data)
-     singleClassTableData.value= data;
-     console.log(singleClassTableData.value)
-   } catch (error) {
-     console.error('Error fetching data:', error);// 处理错误，如显示错误信息
-   }
+   await async_get({
+     url: '/api/school-system/subject-single-class',
+     success: (data)=>{
+       singleClassTableData.value= data;
+     }
+   });
  };
  await getSingleClassTable();
 
  // 发起GET请求获取选科组合的情况的数据
  const getSubjectCombinationClass = async () => {
-   try {
-     const data = await async_get('/api/school-system/subject-all'); // 替换为你的数据URL
-     const dealData = data.map(i=>({
-       name:i.name,
-       value:i.overall
-     }))
-     console.log(dealData)
-     chart2.hideLoading(); // 数据加载完毕，隐藏加载动画
-     //根据后端数据更新图表chart2选项中的数据
-     chart2.setOption({
-       series: [{
-         data: dealData // 假设返回的数据结构中包含product字段
-       }]
-     });
-     // 提取所有班级名称
-     classNames.value = Array.from(new Set(data.flatMap(item => item.classNumber.map(cn => cn.split(':')[0]))));
-
-     // 格式化数据
-     combinationTableData.value = data.map(item => {
-       const classNumbers = {};
-       item.classNumber.forEach(cn => {
-         const [className, count] = cn.split(':');
-         classNumbers[className] = parseInt(count, 10);
+   await async_get({
+     url: '/api/school-system/subject-all',
+     success: (data)=>{
+       const dealData = data.map(i=>({
+         name:i.name,
+         value:i.overall
+       }))
+       chart2.hideLoading(); // 数据加载完毕，隐藏加载动画
+       //根据后端数据更新图表chart2选项中的数据
+       chart2.setOption({
+         series: [{
+           data: dealData // 假设返回的数据结构中包含product字段
+         }]
        });
-       return {
-         name: item.name,
-         overall: item.overall,
-         ...classNumbers
-       };
-     });
-   } catch (error) {
-     console.error('Error fetching data:', error);// 处理错误，如显示错误信息
-   }
+       // 提取所有班级名称
+       classNames.value = Array.from(new Set(data.flatMap(item => item.classNumber.map(cn => cn.split(':')[0]))));
+
+       // 格式化数据
+       combinationTableData.value = data.map(item => {
+         const classNumbers = {};
+         item.classNumber.forEach(cn => {
+           const [className, count] = cn.split(':');
+           classNumbers[className] = parseInt(count, 10);
+         });
+         return {
+           name: item.name,
+           overall: item.overall,
+           ...classNumbers
+         };
+       });
+     }
+   }); // 替换为你的数据URL
  };
  await getSubjectCombinationClass();
 });

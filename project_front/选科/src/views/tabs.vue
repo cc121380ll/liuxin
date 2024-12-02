@@ -3,7 +3,7 @@
   <div>
     <h3>选科管理</h3>
     <div class="container">
-      <el-form :model="query" ref="queryForm">
+      <div class="search-box">
         <el-input v-model="query.name" placeholder="姓名" class="search-input mr10"></el-input>
         <el-select v-model="query.subject" placeholder="学科" class="search-input mr10">
           <el-option value="化学"></el-option>
@@ -17,9 +17,9 @@
           <el-option label=已选 value=1></el-option>
           <el-option label=未选 value=0></el-option>
         </el-select>
-        <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-      </el-form>
-      <el-button type="info" class="button"  @click="exportXlsx">导出选科名单</el-button>
+        <el-button type="primary" :icon="Search" @click="getStuData">搜索</el-button>
+        <el-button type="info" class="button"  @click="exportXlsx">导出选科名单</el-button>
+      </div>
       <el-table :data="tableData" border class="table" header-cell-class-name="table-header" style="margin-top: 20px;">
         <el-table-column label="序号" align="center">
           <template #default="scope">
@@ -49,13 +49,14 @@
   </div>
 </template>
 
-<script setup lang="ts" name="tabs">
-import { ref, reactive } from 'vue';
+<script setup lang="ts">
+import {ref, reactive, onMounted} from 'vue';
 import {  Search } from '@element-plus/icons-vue';
 import SubjectEdit from '../components/subjects-edit.vue';
 import * as XLSX from 'xlsx';
 import { fetchData } from '../api';
-import {getMyData, search,takeAccessToken} from "../net/index.js";
+import {takeAccessToken, async_post} from "../net/index.js";
+import {BASE_URL} from "../main";
 
 const query = reactive({
   name:'',
@@ -75,87 +76,37 @@ interface TableItem {
 
 const tableData = ref<TableItem[]>([]);
 const pageTotal = ref(0);
-// 获取表格数据
-// const getData = () => {
-//     tableData.value = [
-//         {
-//             id: 1,
-//             name: '李大勇',
-//             sno: '2023012654',
-// 			subjects:'物理 化学 生物'
-//         },
-//     ];
-// };
-// getData();
 
-/*const sendDataToBackend = async (data: { tableData: any; pageTotal: any; }) => {
-  try {
-    const response = await fetch('https://example.com/api/teacher-system/collect-information', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    });
 
-    if (!response.ok) {
-      throw new Error('Failed to send data to backend');
-    }
+onMounted(() => {
+  getStuData();
+})
 
-    const responseData = await response.json();
-    console.log('Response from backend:', responseData);
-    // 可以根据后端返回的数据进行相应的处理
-
-  } catch (error) {
-    console.error('Error sending data to backend:', error.message);
-  }
-};
-
-const getDataAndSendToBackend = async () => {
-  try {
-    const res = await fetchData();
-    const tableData = res.data.list;
-    const pageTotal = res.data.pageTotal || 50;
-    // 将数据组装成需要发送给后端的格式
-    const dataToSend = {
-      tableData: tableData,
-      pageTotal: pageTotal
-    };
-    // 发送数据到后端
-    await sendDataToBackend(dataToSend);
-  } catch (error) {
-    console.error('Error getting data:', error.message);
-  }
-};
-
-getDataAndSendToBackend();*/
 const getStuData = async () => {
-  const data = await getMyData("http://115.29.41.122:9662/api/teacher-system/collect-information",query)
-  tableData.value=data.rows
-  pageTotal.value=data.total
+  await async_post({
+    url: '/api/teacher-system/collect-information',
+    data: query,
+    success: (data) => {
+      tableData.value=data.rows
+      pageTotal.value=data.total
+    }
+  })
 }
-getStuData();
-const handleSearch = () => {
+/*const handleSearch = () => {
   search('/api/teacher-system/collect-information',query,(data)=>{
     tableData.value=data.rows
     pageTotal.value=data.total
   })
-};
+};*/
 const handlePageChange = (val: number) => {
   query.pageNum = val;
   getStuData();
 };
 
-const visible = ref(false);
+/*const visible = ref(false);
 let idx: number = -1;
 const idEdit = ref(false);
-const rowData = ref({});
-const handleEdit = (index: number, row: TableItem) => {
-	idx = index;
-	rowData.value = row;
-	idEdit.value = true;
-	visible.value = true;
-};
+
 const updateData = (row: TableItem) => {
 	idEdit.value ? (tableData.value[idx] = row) : tableData.value.unshift(row);
 	console.log(tableData.value);
@@ -167,7 +118,7 @@ const closeDialog = () => {
 	idEdit.value = false;
 };
 
-const list = [['序号', '姓名', '学号', '选择科目', '状态']];
+const list = [['序号', '姓名', '学号', '选择科目', '状态']];*/
 const exportXlsx = () => {
     /*tableData.value.map((item: any, i: number) => {
         const arr: any[] = [i + 1];
@@ -179,7 +130,7 @@ const exportXlsx = () => {
     XLSX.utils.book_append_sheet(new_workbook, WorkSheet, '第一页');
     XLSX.writeFile(new_workbook, `表格.xlsx`);*/
   /*exportXlsx('/api/')*/
-  window.open('http://115.29.41.122:9662/api/teacher-system/export?token='+takeAccessToken())
+  window.open(BASE_URL+'/api/teacher-system/export?token='+takeAccessToken())
 };
 
 
@@ -199,6 +150,9 @@ const exportXlsx = () => {
 }
 h3{
 	margin: 20px;
+}
+.search-box {
+  margin-bottom: 20px;
 }
 .add {
 	font-size: 14px;

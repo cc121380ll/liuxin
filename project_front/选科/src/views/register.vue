@@ -27,7 +27,6 @@
               type="password"
               placeholder="请输入6-16位密码,区分大小写"
               v-model="param.password"
-              @keyup.enter="submitForm(zhuce)"
           >
             <template #prepend>
               <el-button :icon="Lock"></el-button>
@@ -45,6 +44,7 @@
           <el-input
               placeholder="请输入验证码"
               v-model="param.code"
+              @keyup.enter="submitForm"
           >
             <template #append>
               <el-button
@@ -55,7 +55,7 @@
           </el-input>
         </el-form-item>
         <div class="register-bottom">
-          <el-button style="width: 180px" type="primary" @click="submitForm(zhuce)">注册</el-button>
+          <el-button style="width: 180px" type="primary" @click="submitForm">注册</el-button>
           <a href="" style="float: right; font-size: 12px;">使用已有账户登录</a>
         </div>
       </el-form>
@@ -109,13 +109,13 @@ const validatePassword = (rule, value, callback) => {
 }
 const rules: FormRules = {
     phone: [
-        {
+      {
             required: true,
             message: '请输入手机号',
             trigger: 'blur',
-        },
+      },
       {
-        pattern:/^(?:(?:\+|00)86)?1(?:(?:3[\d])|(?:4[5-79])|(?:5[0-35-9])|(?:6[5-7])|(?:7[0-8])|(?:8[\d])|(?:9[189]))\d{8}$/,
+        pattern:/^(?:(?:\+|00)86)?1[3-9]\d{9}$/,
         message:'请输入正确的手机号',
         trigger:'blur'
       }
@@ -149,15 +149,15 @@ const send = (phone) => {
     coldTime.value = 0
   })
 }
-const submitForm = (form) =>{
+const submitForm = () =>{
   post('/api/auth/register',{
-    province:form.info.zone[0],
-    city:form.info.zone[1],
-    county:form.info.zone[2],
-    schoolName:form.school,
-    phone:form.phone,
-    password:form.password,
-    code:form.code
+    province:param.info.zone[0],
+    city:param.info.zone[1],
+    county:param.info.zone[2],
+    schoolName:param.info.school,
+    phone:param.phone,
+    password:param.password,
+    code:param.code
   },()=>{
     ElMessage.success("注册成功");
     router.push('/login');

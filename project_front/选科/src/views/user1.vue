@@ -51,12 +51,17 @@
             <el-button type="success" @click="saveAvatar">上传并保存</el-button>
           </el-tab-pane>
           <el-tab-pane name="label2" label="修改密码" class="user-tabpane"
-                       style="display: flex; align-items: center; justify-content: center;">
+                       style="display: flex; align-items: center; justify-content: center;"
+                       v-permiss = "18"
+          >
+            <h3 v-if="!(role === 'SCHOOL')" style="color:#909399">您无权使用此功能</h3>
             <el-form class="w500"
+                     v-else
                      :rules="rules"
                      :model="form"
                      @validate="onValidate"
-                     ref="loginFormRef">
+                     ref="loginFormRef"
+            >
               <el-form-item>
                 <el-input class="form-input" type="text" v-model="form.phone" placeholder="请输入手机号">
                   <template #prepend>
@@ -97,15 +102,16 @@
 <script setup lang="ts">
 import {reactive, ref, computed, onUnmounted, onMounted} from 'vue';
 import {ElMessage, FormRules} from 'element-plus';
-import {async_get, get, post} from "../net/index.js";
+import {get, post} from "../net/index.js";
 import {Iphone} from "@element-plus/icons-vue";
 import { VueCropper } from 'vue-cropper';
 import 'vue-cropper/dist/index.css';
+import {getAdapter} from "axios";
 // import TabsComp from '../element/tabs.vue';
 
 // const name = localStorage.getItem('ms_username');
 const name = JSON.parse(sessionStorage.getItem("access_token")||localStorage.getItem("access_token")).username
-
+const role = JSON.parse(sessionStorage.getItem("role")||localStorage.getItem("role"))
 const form = reactive({
   phone:'',
   oldPassword:'',
@@ -142,7 +148,7 @@ const rules: FormRules = {
       trigger: 'blur',
     },
     {
-      pattern:/^(?:(?:\+|00)86)?1(?:(?:3[\d])|(?:4[5-79])|(?:5[0-35-9])|(?:6[5-7])|(?:7[0-8])|(?:8[\d])|(?:9[189]))\d{8}$/,
+      pattern:/^(?:(?:\+|00)86)?1[3-9]\d{9}$/,
       message:'请输入正确的手机号',
       trigger:'blur'
     }
@@ -155,6 +161,12 @@ const rules: FormRules = {
   ],
   code:[{required:true,message:'请输入验证码',trigger:'blur'}],
 };
+
+
+onMounted(()=>{
+  getNum();
+  getAvatar();
+})
 const onValidate = (prop, isValid) => {
   if(prop === 'phone')
     isPhoneValid.value = isValid
@@ -234,8 +246,8 @@ const getNum = () => {
     });
   }catch (error) {
     console.error('Error fetching data:', error);// 处理错误，如显示错误信息
-  }}
-getNum();
+  }
+}
 const getAvatar = () => {
   try{
     get('/api/auth/load-avatar',(data)=>{
@@ -245,7 +257,6 @@ const getAvatar = () => {
     console.error('Error fetching data:', error);// 处理错误，如显示错误信息
   }
 }
-getAvatar();
 </script>
 
 <style scoped>
