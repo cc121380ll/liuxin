@@ -172,7 +172,7 @@ const handleDelete = (index: number) => {
       .then(() => {
         // 先从服务器删除数据
         deletes({
-          api: `/api/school-system/school-subject/delete/${tableData.value[index].id}`,
+          url: `/api/school-system/school-subject/delete/${tableData.value[index].id}`,
           success: ()=>{
             // 服务器删除成功后，更新本地数组
             ElMessage.success('删除成功');

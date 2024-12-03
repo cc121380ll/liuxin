@@ -156,10 +156,14 @@ function login(username,password,remember,success,failure=defaultFailure){
 	},failure)
 }
 function logout(success, failure = defaultFailure){
-	get('/api/auth/logout', () => {
-		deleteAccessToken()
-		ElMessage.success(`退出登录成功，欢迎您再次使用`)
-		//success()
-	}, failure)
+	get({
+		url: '/api/auth/logout',
+		success: () => {
+			deleteAccessToken()
+			ElMessage.success(`退出登录成功，欢迎您再次使用`)
+			//success()
+		},
+		failure: failure
+	});
 }
 export {login,unauthorized,get,post,logout,deletes,put,takeAccessToken,async_get,async_post}

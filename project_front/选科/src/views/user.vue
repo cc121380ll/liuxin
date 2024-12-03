@@ -69,7 +69,7 @@ import VueCropper from 'vue-cropperjs';
 import 'cropperjs/dist/cropper.css';
 import avatar from '../assets/img/img.jpg';
 import { ElMessage, FormInstance, FormRules, UploadProps } from 'element-plus';
-import {put,editData,post} from "../net/index.js";
+import {put,post} from "../net/index.js";
 const name=JSON.parse(sessionStorage.getItem("access_token")||localStorage.getItem("access_token")).username
 const form = reactive({
   phone:'',
@@ -130,9 +130,13 @@ const form = reactive({
 // 		ElMessage.success('保存成功！');
 // };
 const onSubmit = ()=>{
-  post('/api/school-system/reset/school/reset-password',form,()=>{
-    ElMessage.success("更新成功")
-  })
+  post({
+    url: '/api/school-system/reset/school/reset-password',
+    data: form,
+    success:()=>{
+      ElMessage.success("更新成功")
+    }
+  });
 }
 
 const avatarImg = ref(avatar);
